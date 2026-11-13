@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Pizzeria Ensen : le Puy de Naouri de Brasserie Ensen (même ciel, même silhouette),
+       avec une pizza napolitaine à la place du soleil. Même idée que l'en-tête (js/ui.js).
+       Les PNG (icon-180/192/512) sont générés à partir de ce fichier : node dev/icones.mjs -->
+  <defs>
+    <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8d68c"/>
+      <stop offset="0.6" stop-color="#eda04a"/>
+      <stop offset="1" stop-color="#d9772b"/>
+    </linearGradient>
+    <clipPath id="garniture"><circle cx="322" cy="198" r="80"/></clipPath>
+  </defs>
+  <rect width="512" height="512" fill="url(#ciel)"/>
+  <!-- Cornicione et taches de cuisson -->
+  <circle cx="322" cy="198" r="100" fill="#fff1d6"/>
+  <g fill="#8a4b22" fill-opacity="0.75">
+    <circle cx="238" cy="167" r="7"/>
+    <circle cx="268" cy="125" r="5"/>
+    <circle cx="312" cy="108" r="6"/>
+    <circle cx="366" cy="121" r="5"/>
+    <circle cx="400" cy="152" r="6"/>
+    <circle cx="412" cy="196" r="5"/>
+    <circle cx="234" cy="214" r="5"/>
+  </g>
+  <!-- Sauce tomate, fior di latte, basilic -->
+  <circle cx="322" cy="198" r="80" fill="#d23f22"/>
+  <g clip-path="url(#garniture)">
+    <g fill="#fffaf0">
+      <circle cx="290" cy="160" r="20"/>
+      <circle cx="352" cy="176" r="18"/>
+      <circle cx="300" cy="222" r="16"/>
+      <circle cx="358" cy="236" r="14"/>
+      <circle cx="330" cy="128" r="12"/>
+    </g>
+    <g fill="#2f7a2c">
+      <path d="M318 188c10-14 30-16 40-8-10 14-30 16-40 8Z"/>
+      <path d="M262 198c6-15 24-22 36-16-6 15-24 22-36 16Z"/>
+    </g>
+  </g>
+  <!-- Collines et Puy de Naouri -->
+  <path fill="#b65a26" fill-opacity="0.55" d="M0 352C48 338 92 330 134 336C172 341 196 326 236 330C286 336 332 314 384 312C436 310 476 324 512 334V512H0Z"/>
+  <path fill="#2b2420" d="M0 428C70 418 122 380 170 332C210 292 242 256 292 251C332 247 358 264 382 284C400 299 416 300 432 309C462 327 490 366 512 382V512H0Z"/>
+</svg>
