@@ -498,11 +498,13 @@ small { font-size: 0.8em; }
   font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
+.grille-temp { font-size: 14px; }
 .grille-temp th,
-.grille-temp td { padding: 9px 4px; text-align: right; white-space: nowrap; }
+.grille-temp td { padding: 9px 3px; text-align: right; white-space: nowrap; }
 .grille-temp th:first-child { text-align: left; }
 .grille-temp thead th { color: var(--texte-doux); font-size: 13px; font-weight: 700; }
 .grille-temp tbody tr > * { border-top: 1px solid var(--bordure); }
+.grille-temp .calcule { color: var(--texte-doux); font-style: italic; }
 
 details summary { min-height: 44px; padding: 10px 0; color: var(--accent); font-weight: 600; cursor: pointer; }
 .details-import summary { min-height: 0; padding: 0; }

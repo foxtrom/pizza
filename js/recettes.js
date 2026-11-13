@@ -34,7 +34,7 @@ const BORNES = {
   levureGrammes: [0.01, 1000, 'g', 'Dose de levure'],
   temp: [0, 45, '°C', 'Température de la pièce'],
   ta: [0, 45, '°C', 'TA'],
-  pointage: [0, 72, 'h', 'Levage à TA'],
+  pointage: [0, 72, 'h', 'Pointage'],
   froidHeures: [0, 240, 'h', 'Levage au frigo'],
   froidTemp: [-5, 15, '°C', 'Température du frigo'],
   tempEau: [-5, 60, '°C', 'Température de l’eau'],
@@ -315,8 +315,13 @@ export function recetteDepuisFormulaire(champs, existante = null, { source = 'ma
   const ta = lire('ta', 'ta');
   const pointage = lire('pointage', 'pointage');
   const froidHeures = lire('froidHeures', 'froidHeures');
-  let froidMin = lire('froidMin', 'froidTemp');
-  const froidMax = lire('froidMax', 'froidTemp');
+  // Température du frigo : pense-bête, jamais utilisé dans un calcul. Une valeur illisible est ignorée.
+  const temperatureFrigo = (nom) => {
+    const t = lireNombre(champs[nom]);
+    return Number.isFinite(t) && !horsBornes(t, 'froidTemp') ? t : null;
+  };
+  let froidMin = temperatureFrigo('froidMin');
+  const froidMax = temperatureFrigo('froidMax');
   if (froidMin == null && froidMax != null) froidMin = froidMax;
 
   if (levureGrammes != null && ta == null && !erreurs.ta) erreurs.ta = 'À renseigner avec la dose de levure.';

@@ -1,8 +1,8 @@
 // Écrans de l'appli : chaque fonction renvoie le HTML d'une page (gabarits sûrs).
 // Aucune action ici : les boutons portent des data-action, traités par app.js.
 
-import { dosesRecette, releveDeReference } from './calculs.js';
-import { brut, degres, duree, grammes, html, nombre, plage, plageDuree, pluriel, pourcent } from './outils.js';
+import { dosesRecette, lireGrille, releveDeReference } from './calculs.js';
+import { brut, degres, duree, dureeCompacte, grammes, html, nombre, plage, plageDureeCompacte, pluriel, pourcent } from './outils.js';
 import { recetteDuMemeNom, TYPES_LEVURE } from './recettes.js';
 import { COLLINE, ICONES } from './ui.js';
 
@@ -39,7 +39,7 @@ export const resumePate = (r) => `${r.boules} × ${grammes(r.poidsBoule)} · eau
 
 export function resumeFermentation(r) {
   const morceaux = [];
-  if (r.pointage != null) morceaux.push(`${duree(r.pointage)} à TA`);
+  if (r.pointage != null) morceaux.push(`pointage ${duree(r.pointage)}`);
   if (r.froid.heures != null) morceaux.push(`${duree(r.froid.heures)} au frigo`);
   if (r.grille.length > 1) morceaux.push(`grille ${plage([r.grille[0].temp, r.grille.at(-1).temp], '°C')}`);
   const releve = releveDeReference(r);
@@ -130,26 +130,50 @@ export function ecranRecettes(etat) {
       : html`<p class="vide">Aucune recette pour l’instant.</p>`}`;
 }
 
+// Valeurs calculées entre deux températures : arrondies à ce qui sert en cuisine.
+const cinqMinutes = (heures) => Math.round(heures * 12) / 12;
+const demiDegre = (temp) => Math.round(temp * 2) / 2;
+
 function blocGrille(r) {
+  // [colonne, titre, mise en forme d'une valeur relevée, mise en forme d'une valeur calculée]
   const colonnes = [
-    ['temp', 'Pièce', (g) => degres(g.temp)],
-    ['levure', libelleLevure(r), (g) => (g.levure == null ? '—' : pourcent(g.levure, 3))],
-    ['tempEau', 'Eau', (g) => (g.tempEau == null ? '' : degres(g.tempEau))],
-    ['pointage', 'Pointage', (g) => (g.pointage == null ? '' : duree(g.pointage))],
-    ['remise', 'Remise', (g) => (g.remise == null ? '' : plageDuree(g.remise))],
-  ].filter(([nom], i) => i < 2 || r.grille.some((g) => g[nom] != null));
-  const manquantes = r.grille.some((g) => g.levure == null);
+    ['levure', libelleLevure(r), (v) => pourcent(v, 3), (v) => pourcent(v, 3)],
+    ['tempEau', 'Eau', degres, (v) => degres(demiDegre(v))],
+    ['pointage', 'Pointage', dureeCompacte, (v) => dureeCompacte(cinqMinutes(v))],
+    ['remise', 'Remise', plageDureeCompacte, (v) => plageDureeCompacte(v.map(cinqMinutes))],
+  ].filter(([nom], i) => i === 0 || r.grille.some((g) => g[nom] != null));
+
+  let calculees = false;
+  let manquantes = false;
+  const lignes = r.grille.map((g) => {
+    const lu = lireGrille(r.grille, g.temp);
+    const cellules = colonnes.map(([nom, , releve, calcule]) => {
+      const { valeur, calculee } = lu[nom];
+      if (valeur == null) {
+        if (nom === 'levure') manquantes = true;
+        return html`<td>${nom === 'levure' ? '—' : ''}</td>`;
+      }
+      if (!calculee) return html`<td>${releve(valeur)}</td>`;
+      calculees = true;
+      return html`<td class="calcule">≈ ${calcule(valeur)}</td>`;
+    });
+    return html`<tr><th scope="row">${degres(g.temp)}</th>${cellules}</tr>`;
+  });
+
+  const legende = [
+    `${libelleLevure(r)} en % de la farine`,
+    calculees && '≈ : calculé entre les deux températures voisines',
+    manquantes && '— : dose à compléter',
+  ].filter(Boolean);
   return html`<section class="bloc">
     <h3>Grille par température de la pièce</h3>
     <div class="defilement">
       <table class="grille-temp">
-        <thead><tr>${colonnes.map(([, titre]) => html`<th scope="col">${titre}</th>`)}</tr></thead>
-        <tbody>${r.grille.map(
-          (g) => html`<tr>${colonnes.map(([, , valeur], i) => (i === 0 ? html`<th scope="row">${valeur(g)}</th>` : html`<td>${valeur(g)}</td>`))}</tr>`,
-        )}</tbody>
+        <thead><tr><th scope="col">Pièce</th>${colonnes.map(([, titre]) => html`<th scope="col">${titre}</th>`)}</tr></thead>
+        <tbody>${lignes}</tbody>
       </table>
     </div>
-    <p class="aide">${libelleLevure(r)} en % de la farine${manquantes ? ' ; — : dose à compléter' : ''}.${r.grille.some((g) => g.tempEau != null) ? ' Eau : température de l’eau du pétrissage.' : ''}</p>
+    <p class="aide">${legende.join(' ; ')}.${r.grille.some((g) => g.tempEau != null) ? ' Eau : température de l’eau du pétrissage.' : ''}</p>
   </section>`;
 }
 
@@ -300,7 +324,7 @@ function apercuImport(res, i, etat) {
       <dt>Levure</dt><dd>${releve
         ? html`${libelleLevure(r)} ${pourcent(releve.levure, 3)}<small>pièce à ${degres(releve.temp)}</small>`
         : `${libelleLevure(r)} à compléter`}</dd>
-      ${r.pointage != null ? html`<dt>Levage à TA</dt><dd>${duree(r.pointage)}</dd>` : ''}
+      ${r.pointage != null ? html`<dt>Pointage</dt><dd>${duree(r.pointage)}</dd>` : ''}
       ${r.froid.heures != null
         ? html`<dt>Frigo</dt><dd>${duree(r.froid.heures)}${r.froid.temp ? html`<small>à ${plage(r.froid.temp, '°C')}</small>` : ''}</dd>`
         : ''}
@@ -343,6 +367,7 @@ export function ecranFormulaire(etat, recette = null) {
   const types = { ...TYPES_LEVURE };
   if (v.typeLevure && !types[v.typeLevure]) types[v.typeLevure] = v.typeLevure;
   const grille = recette?.grille ?? [];
+  // La température du frigo n'est pas demandée : simple pense-bête lu à l'import, transmis tel quel (champs cachés).
 
   return html`<form id="form-recette" data-form="recette" novalidate>
     ${general ? html`<p class="banniere banniere-info">${general}</p>` : ''}
@@ -373,22 +398,22 @@ export function ecranFormulaire(etat, recette = null) {
       </label>
       <div class="deux-colonnes">
         ${nombreSaisi('levureGrammes', 'Dose', { unite: 'g' })}
-        ${nombreSaisi('ta', 'TA', { unite: '°C' })}
+        ${nombreSaisi('ta', 'Pour une pièce à', { unite: '°C' })}
       </div>
-      <p class="aide">Dose donnée par Pizza App pour ce nombre de boules, à la température ambiante (TA) indiquée. Laisser vide si elle n’est pas encore connue.</p>
+      <p class="aide">Dose et température de la pièce données par Pizza App (« LBF » et « TA »), pour ce nombre de boules. Laisser vide si la dose n’est pas encore connue.</p>
       ${grille.length > 1
-        ? html`<p class="aide">Cette recette a une grille de ${pluriel(grille.length, 'température')} (${grille.map((g) => nombre(g.temp, 1)).join(', ')} °C) : la dose saisie complète le relevé à la TA indiquée.</p>`
+        ? html`<p class="aide">Si cette température n’est pas dans la grille de la recette, une ligne s’y ajoute : l’eau, le pointage et la remise y sont calculés entre les températures voisines.</p>`
         : ''}
     </fieldset>
     <fieldset>
       <legend>Fermentation</legend>
       <div class="deux-colonnes">
-        ${nombreSaisi('pointage', 'Levage à TA', { unite: 'h' })}
-        ${nombreSaisi('froidHeures', 'Levage à CT', { unite: 'h' })}
-        ${nombreSaisi('froidMin', 'CT (frigo)', { unite: '°C' })}
-        ${nombreSaisi('froidMax', 'CT maxi', { unite: '°C' })}
+        ${nombreSaisi('pointage', 'Pointage', { unite: 'h' })}
+        ${nombreSaisi('froidHeures', 'Frigo', { unite: 'h' })}
       </div>
-      <p class="aide">Levage à TA : durée du pointage, avant le boulage. Laisser vide si la grille de la recette la donne. CT maxi : seulement pour une plage (4 à 5 °C).</p>
+      <p class="aide">Pointage : avant le boulage (« Levage à TA » dans Pizza App), à laisser vide si la grille de la recette le donne. Frigo : « Levage à CT ».</p>
+      <input type="hidden" name="froidMin" value="${v.froidMin ?? ''}">
+      <input type="hidden" name="froidMax" value="${v.froidMax ?? ''}">
     </fieldset>
     <label class="champ">
       <span class="libelle">Notes</span>

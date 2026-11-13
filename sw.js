@@ -7,9 +7,12 @@
 // Les caches s'appellent « pizzeria-… » : Brasserie Ensen, publiée sur le même
 // domaine github.io, supprime tous les caches « ensen-… » qui ne sont pas les siens.
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.3';
 const PREFIXE = 'pizzeria-';
 const CACHE = `${PREFIXE}${VERSION}`;
+// Sur l'ordinateur (serveur local), les fichiers frais passent avant la copie : chaque modification
+// se voit en rechargeant la page. En ligne, la copie gardée passe d'abord (rapide, hors ligne).
+const EN_LOCAL = ['localhost', '127.0.0.1'].includes(self.location.hostname);
 
 const FICHIERS = [
   './',
@@ -58,6 +61,14 @@ self.addEventListener('message', (evenement) => {
 self.addEventListener('fetch', (evenement) => {
   const requete = evenement.request;
   if (requete.method !== 'GET' || new URL(requete.url).origin !== self.location.origin) return;
+  if (EN_LOCAL) {
+    evenement.respondWith(
+      fetch(requete).catch(() =>
+        caches.match(requete, { ignoreSearch: true }).then((enCache) => enCache ?? caches.match('./index.html')),
+      ),
+    );
+    return;
+  }
   evenement.respondWith(
     caches.match(requete, { ignoreSearch: true }).then(
       (enCache) =>

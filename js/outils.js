@@ -117,6 +117,23 @@ export function plageDuree(valeurs) {
   return `${duree(a)} à ${duree(b)}`;
 }
 
+/** Durée courte pour les tableaux étroits : 3 → « 3 h » ; 2,67 → « 2h40 » ; 0,75 → « 45 min ». */
+export function dureeCompacte(heures) {
+  const minutes = Math.round(heures * 60);
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (!h) return `${m}${INSECABLE}min`;
+  return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}${INSECABLE}h`;
+}
+
+/** Plage de durées courte : [4, 5] → « 4–5 h » ; [3,67, 4,67] → « 3h40–4h40 ». */
+export function plageDureeCompacte(valeurs) {
+  const [a, b] = valeurs;
+  if (a === b) return dureeCompacte(a);
+  if (Number.isInteger(a) && Number.isInteger(b)) return `${a}–${b}${INSECABLE}h`;
+  return `${dureeCompacte(a).replace(INSECABLE, '')}–${dureeCompacte(b).replace(INSECABLE, '')}`;
+}
+
 /* ---------- Textes ---------- */
 
 export const sansAccents = (texte) => String(texte).normalize('NFD').replace(/[̀-ͯ]/g, '');

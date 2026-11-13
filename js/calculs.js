@@ -48,6 +48,73 @@ export function releveDeReference(recette) {
   return recette.grille.find((releve) => releve.levure != null) ?? null;
 }
 
+/* ---------- Lecture de la grille entre deux températures ---------- */
+
+/**
+ * Valeur à `x` sur une courbe qui passe exactement par chaque point et ne dépasse
+ * jamais les valeurs de ses deux voisins (interpolation monotone de Fritsch-Carlson).
+ * Entre deux points seulement, c'est une droite. Hors de la plage des points : null.
+ * points : [{ x, y }] (températures distinctes).
+ */
+export function interpoler(points, x) {
+  const p = [...points].sort((a, b) => a.x - b.x);
+  const n = p.length;
+  if (!n || x < p[0].x || x > p[n - 1].x) return null;
+  const exact = p.find((point) => point.x === x);
+  if (exact) return exact.y;
+
+  const pentes = p.slice(0, -1).map((point, i) => (p[i + 1].y - point.y) / (p[i + 1].x - point.x));
+  const tangentes = p.map((_, i) => {
+    if (i === 0) return pentes[0];
+    if (i === n - 1) return pentes[n - 2];
+    return pentes[i - 1] * pentes[i] <= 0 ? 0 : (pentes[i - 1] + pentes[i]) / 2;
+  });
+  pentes.forEach((pente, i) => {
+    if (pente === 0) {
+      tangentes[i] = 0;
+      tangentes[i + 1] = 0;
+      return;
+    }
+    const a = tangentes[i] / pente;
+    const b = tangentes[i + 1] / pente;
+    const s = a * a + b * b;
+    if (s > 9) {
+      tangentes[i] = (3 / Math.sqrt(s)) * a * pente;
+      tangentes[i + 1] = (3 / Math.sqrt(s)) * b * pente;
+    }
+  });
+
+  const k = p.findIndex((point, i) => i < n - 1 && x >= point.x && x <= p[i + 1].x);
+  const h = p[k + 1].x - p[k].x;
+  const t = (x - p[k].x) / h;
+  return (
+    (2 * t ** 3 - 3 * t ** 2 + 1) * p[k].y +
+    (t ** 3 - 2 * t ** 2 + t) * h * tangentes[k] +
+    (-2 * t ** 3 + 3 * t ** 2) * p[k + 1].y +
+    (t ** 3 - t ** 2) * h * tangentes[k + 1]
+  );
+}
+
+/**
+ * Valeurs de la grille pour une température de pièce : celles relevées si la ligne
+ * existe, sinon calculées entre les deux températures voisines (null au-delà de la grille).
+ * Chaque valeur : { valeur, calculee } ; la remise est une plage [min, max].
+ */
+export function lireGrille(grille, temp) {
+  const ligne = grille.find((r) => r.temp === temp);
+  const colonne = (nom) => {
+    if (ligne?.[nom] != null) return { valeur: ligne[nom], calculee: false };
+    const points = grille.filter((r) => r[nom] != null);
+    if (nom === 'remise') {
+      const min = interpoler(points.map((r) => ({ x: r.temp, y: r.remise[0] })), temp);
+      const max = interpoler(points.map((r) => ({ x: r.temp, y: r.remise[1] })), temp);
+      return { valeur: min == null || max == null ? null : [min, max], calculee: true };
+    }
+    return { valeur: interpoler(points.map((r) => ({ x: r.temp, y: r[nom] })), temp), calculee: true };
+  };
+  return { levure: colonne('levure'), tempEau: colonne('tempEau'), pointage: colonne('pointage'), remise: colonne('remise') };
+}
+
 /** Doses d'une recette de référence pour un nombre de boules. */
 export function dosesRecette(recette, boules) {
   const releve = releveDeReference(recette);
