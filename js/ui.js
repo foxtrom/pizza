@@ -13,6 +13,8 @@ export const ICONES = {
     '<path d="M12 21.5 3.2 7.4a17 17 0 0 1 17.6 0Z"/><path d="M5 10.3a13.5 13.5 0 0 1 14 0"/><circle cx="10" cy="13" r="1.3"/><circle cx="14" cy="14.6" r="1.3"/><circle cx="12" cy="17.7" r="1"/>',
   ),
   livre: icone('<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'),
+  carnet: icone('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>'),
+  disquette: icone('<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/>'),
   reglages: icone(
     '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
   ),

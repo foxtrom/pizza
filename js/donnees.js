@@ -1,6 +1,7 @@
 // Données de l'appli (recettes, dernière fournée, réglages) et fichier de sauvegarde.
 // Aucun accès à la page : testable avec Node.
 
+import { normaliserEntree } from './carnet.js';
 import { JSON_48H, TEXTE_PIZZA_APP } from './exemples.js';
 import { lireRecettes } from './import.js';
 import { nouvelId } from './outils.js';
@@ -15,9 +16,10 @@ export function donneesVides() {
   return {
     version: VERSION_DONNEES,
     recettes: [],
-    // Dernière fournée préparée. L'heure du repas et la température de la pièce
-    // serviront au planning et à l'ajustement de la levure.
-    fournee: { recetteId: null, boules: null, repas: null, tempPiece: null },
+    // Variables de la dernière fournée. levurePct : dose saisie pour cette fournée seulement
+    // (null = celle de la grille de la recette). L'heure du repas servira au planning.
+    fournee: { recetteId: null, boules: null, tempPiece: null, levurePct: null, repas: null },
+    fournees: [], // carnet : fournées enregistrées, de la plus récente à la plus ancienne
     reglages: { ...REGLAGES_DEFAUT },
     meta: { derniereSauvegarde: null },
   };
@@ -58,12 +60,19 @@ export function normaliserDonnees(source) {
   const fournee = source.fournee ?? {};
   const recette = donnees.recettes.find((r) => r.id === fournee.recetteId) ?? donnees.recettes[0] ?? null;
   const boulesValides = Number.isInteger(fournee.boules) && fournee.boules >= 1 && fournee.boules <= 99;
+  const memeRecette = recette?.id === fournee.recetteId;
   donnees.fournee = {
     recetteId: recette?.id ?? null,
     boules: boulesValides ? fournee.boules : (recette?.boules ?? null),
+    tempPiece: Number.isFinite(fournee.tempPiece) && fournee.tempPiece >= 0 && fournee.tempPiece <= 45 ? fournee.tempPiece : null,
+    levurePct: memeRecette && Number.isFinite(fournee.levurePct) && fournee.levurePct > 0 && fournee.levurePct <= 10 ? fournee.levurePct : null,
     repas: typeof fournee.repas === 'string' ? fournee.repas : null,
-    tempPiece: Number.isFinite(fournee.tempPiece) ? fournee.tempPiece : null,
   };
+
+  donnees.fournees = (Array.isArray(source.fournees) ? source.fournees : [])
+    .map(normaliserEntree)
+    .filter(Boolean)
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   donnees.reglages = { ...REGLAGES_DEFAUT, ...(source.reglages ?? {}) };
   if (!['auto', 'clair', 'sombre'].includes(donnees.reglages.theme)) donnees.reglages.theme = 'auto';
@@ -81,6 +90,7 @@ export function creerSauvegarde(donnees, maintenant = new Date()) {
     exporteLe: maintenant.toISOString(),
     recettes: donnees.recettes,
     fournee: donnees.fournee,
+    fournees: donnees.fournees,
     reglages: donnees.reglages,
   };
 }

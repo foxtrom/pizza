@@ -96,21 +96,47 @@ export function interpoler(points, x) {
 }
 
 /**
- * Valeurs de la grille pour une température de pièce : celles relevées si la ligne
- * existe, sinon calculées entre les deux températures voisines (null au-delà de la grille).
- * Chaque valeur : { valeur, calculee } ; la remise est une plage [min, max].
+ * Valeur d'une colonne pour une température : relevée, calculée entre deux relevés,
+ * ou, au-delà des relevés, celle du relevé le plus proche avec le sens de l'écart
+ * (limite « plus » : la vraie valeur est au-dessus ; « moins » : en dessous).
+ * Avec un seul relevé, rien n'est calculé ailleurs qu'à sa température.
+ * Renvoie { valeur, calculee, limite } (valeur null si rien ne peut être dit).
  */
-export function lireGrille(grille, temp) {
-  const ligne = grille.find((r) => r.temp === temp);
+export function lireColonne(points, temp) {
+  const p = points.filter((point) => point.y != null).sort((a, b) => a.x - b.x);
+  const rien = { valeur: null, calculee: false, limite: null };
+  if (!p.length || temp == null) return rien;
+  const exact = p.find((point) => point.x === temp);
+  if (exact) return { valeur: exact.y, calculee: false, limite: null };
+  const entreDeux = interpoler(p, temp);
+  if (entreDeux != null) return { valeur: entreDeux, calculee: true, limite: null };
+  if (p.length === 1) return rien;
+  const [premier, dernier] = [p[0], p[p.length - 1]];
+  const proche = temp < premier.x ? premier : dernier;
+  if (premier.y === dernier.y) return { valeur: proche.y, calculee: true, limite: null };
+  const monte = dernier.y > premier.y;
+  const limite = temp < premier.x ? (monte ? 'moins' : 'plus') : monte ? 'plus' : 'moins';
+  return { valeur: proche.y, calculee: true, limite };
+}
+
+/**
+ * Valeurs de la grille pour une température de pièce : relevées si la ligne existe,
+ * sinon calculées entre les deux températures voisines.
+ * Au-delà de la grille : null, ou avec { auDela: true } la valeur du bord et sa limite.
+ * Chaque valeur : { valeur, calculee, limite } ; la remise est une plage [min, max].
+ */
+export function lireGrille(grille, temp, { auDela = false } = {}) {
   const colonne = (nom) => {
-    if (ligne?.[nom] != null) return { valeur: ligne[nom], calculee: false };
     const points = grille.filter((r) => r[nom] != null);
+    let lu;
     if (nom === 'remise') {
-      const min = interpoler(points.map((r) => ({ x: r.temp, y: r.remise[0] })), temp);
-      const max = interpoler(points.map((r) => ({ x: r.temp, y: r.remise[1] })), temp);
-      return { valeur: min == null || max == null ? null : [min, max], calculee: true };
+      const min = lireColonne(points.map((r) => ({ x: r.temp, y: r.remise[0] })), temp);
+      const max = lireColonne(points.map((r) => ({ x: r.temp, y: r.remise[1] })), temp);
+      lu = min.valeur == null || max.valeur == null ? min : { ...min, valeur: [min.valeur, max.valeur] };
+    } else {
+      lu = lireColonne(points.map((r) => ({ x: r.temp, y: r[nom] })), temp);
     }
-    return { valeur: interpoler(points.map((r) => ({ x: r.temp, y: r[nom] })), temp), calculee: true };
+    return lu.limite && !auDela ? { valeur: null, calculee: false, limite: null } : lu;
   };
   return { levure: colonne('levure'), tempEau: colonne('tempEau'), pointage: colonne('pointage'), remise: colonne('remise') };
 }

@@ -4,7 +4,14 @@ Appli perso pour l'iPhone : les doses de pâte à pizza napolitaine de chaque fo
 
 Appli web statique (HTML, CSS, JavaScript, sans dépendance), installable sur l'écran d'accueil et utilisable hors ligne. Les recettes restent sur le téléphone ; une sauvegarde s'exporte depuis Réglages.
 
-**Étape 1 (version 0.1.0)** : import du texte Pizza App ou d'un bloc JSON, saisie manuelle, recalcul des doses selon le nombre de boules, sauvegarde, fonctionnement hors ligne.
+**Étape 1** : import du texte Pizza App ou d'un bloc JSON, saisie manuelle, recalcul des doses selon le nombre de boules, sauvegarde, fonctionnement hors ligne.
+
+**Étape 2 (version 0.2.0)** : les recettes sont des modèles. Une fournée part des variables du jour : nombre de boules, température de la pièce et dose de levure. La dose est proposée par la grille de la recette, calculée entre deux températures si besoin, et peut être corrigée pour cette fournée seulement. « Valider » ouvre le récap :
+- les doses, avec l'eau en deux versements (85 % puis bassinage, réglable dans chaque recette) ;
+- la température de l'eau ;
+- les durées de pointage, de frigo et de remise à température.
+
+**Carnet des fournées** : depuis le récap, « Ajouter au carnet » enregistre une copie figée de la fournée. Après la cuisson, on y note le résultat : une note sur 5, des constats rapides (facile à étaler, collante…) et un commentaire. Le résultat n'est gardé qu'après avoir touché « Enregistrer », en haut à droite. L'écran Fournée rappelle le dernier résultat de la recette choisie, pour ajuster la fournée suivante.
 
 ## Essayer sur l'ordinateur
 
@@ -72,7 +79,9 @@ css/app.css                        thème clair/sombre, gros boutons
 js/app.js                          démarrage, navigation, actions
 js/ecrans.js, js/ui.js             écrans et composants
 js/import.js                       lecture du texte Pizza App et du bloc JSON
-js/calculs.js                      doses (pourcentages du boulanger)
+js/calculs.js                      doses (pourcentages du boulanger), lecture de la grille entre deux températures
+js/fournee.js                      fournée : variables du jour (boules, pièce, levure) et récap
+js/carnet.js                       carnet des fournées : récap figé et résultat (note, constats, commentaire)
 js/recettes.js                     modèle d'une recette, grille par température, formulaire
 js/donnees.js, js/db.js            données, sauvegarde, stockage local (IndexedDB)
 js/exemples.js                     les deux recettes du cahier des charges, préchargées

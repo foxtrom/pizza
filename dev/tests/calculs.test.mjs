@@ -71,7 +71,11 @@ test('grille 48 h : à 20 °C, eau, pointage et remise calculés entre 19 et 22 
   assert.ok(Math.abs(lu.tempEau.valeur - 22.7) < 0.05);
   assert.deepEqual(lu.remise.valeur.map((h) => Math.round(h * 60)), [220, 280]); // 3 h 40 à 4 h 40
   assert.equal(lu.levure.valeur, null); // aucune dose relevée : rien à calculer
-  assert.deepEqual(lireGrille(grille, 22).pointage, { valeur: 2, calculee: false });
+  assert.deepEqual(lireGrille(grille, 22).pointage, { valeur: 2, calculee: false, limite: null });
+  // Au-delà de la grille : rien, sauf si on demande la valeur du bord avec le sens de l'écart.
+  assert.equal(lireGrille(grille, 17).pointage.valeur, null);
+  assert.deepEqual(lireGrille(grille, 17, { auDela: true }).pointage, { valeur: 3, calculee: true, limite: 'plus' });
+  assert.deepEqual(lireGrille(grille, 31, { auDela: true }).tempEau, { valeur: 8, calculee: true, limite: 'moins' });
 });
 
 test('arrondis : au gramme, levure au centième, 0,5 vers le haut', () => {

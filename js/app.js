@@ -11,21 +11,39 @@ import {
   normaliserDonnees,
 } from './donnees.js';
 import {
-  blocDoses,
+  aideLevure,
+  aideTemperature,
+  boutonEnregistrer,
   boutonsFormulaire,
+  ecranCarnet,
+  ecranEntree,
   ecranFormulaire,
   ecranFournee,
   ecranImport,
+  ecranRecap,
   ecranRecette,
   ecranRecettes,
   ecranReglages,
   enteteMarque,
   enteteTitre,
+  etatResultat,
+  texteLevure,
+  variablesFournee,
   zoneDoublon,
 } from './ecrans.js';
+import { basculerConstat, brouillonResultat, enregistrerResultat, nouvelleEntree, resultatModifie } from './carnet.js';
+import { levureSaisie, lireVariable, verifierVariables } from './fournee.js';
 import { ErreurImport, lireRecettes } from './import.js';
-import { html, pluriel } from './outils.js';
-import { nomLibre, recetteDepuisFormulaire, recetteDuMemeNom, valeursEnTexte, valeursFormulaire } from './recettes.js';
+import { grammes, html, pluriel } from './outils.js';
+import {
+  champsDepuisEntrees,
+  LIGNE_VIDE,
+  nomLibre,
+  recetteDepuisFormulaire,
+  recetteDuMemeNom,
+  valeursEnTexte,
+  valeursFormulaire,
+} from './recettes.js';
 import { confirmer, fermerFeuille, toast } from './ui.js';
 
 const $ = (selecteur) => document.querySelector(selecteur);
@@ -39,6 +57,8 @@ const etat = {
   peutColler: Boolean(navigator.clipboard?.readText),
   import: { texte: '', resultats: null, erreur: null },
   formulaire: null, // { cle, recetteId, valeurs, erreurs, general, origine }
+  erreursFournee: {}, // { tempPiece, levure } après un « Valider » refusé
+  brouillon: null, // résultat en cours de saisie d'une fournée du carnet (perdu sans « Enregistrer »)
   routeAffichee: null,
 };
 
@@ -100,6 +120,7 @@ function naviguer(chemin) {
 }
 
 const trouverRecette = (id) => etat.donnees.recettes.find((r) => r.id === id) ?? null;
+const trouverEntree = (id) => etat.donnees.fournees.find((e) => e.id === id) ?? null;
 const recetteFournee = () => trouverRecette(etat.donnees.fournee.recetteId) ?? etat.donnees.recettes[0] ?? null;
 
 /** Après un ajout ou une suppression : la fournée pointe toujours vers une recette existante. */
@@ -119,6 +140,7 @@ function afficher() {
   const route = lireRoute();
   const nouvellePage = route.cle !== etat.routeAffichee;
   if (etat.formulaire && etat.formulaire.cle !== route.cle) etat.formulaire = null; // formulaire quitté
+  if (etat.brouillon && !(route.page === 'carnet' && route.id === etat.brouillon.id)) etat.brouillon = null; // fiche quittée sans enregistrer
 
   let entete;
   let contenu;
@@ -130,9 +152,17 @@ function afficher() {
     case '':
       onglet = 'fournee';
       collant = false;
-      entete = enteteMarque('Doses de la fournée');
-      contenu = ecranFournee(etat);
+      entete = enteteMarque('Préparer une fournée');
+      contenu = ecranFournee(etat, etat.erreursFournee);
       break;
+    case 'recap': {
+      const { recette, variables } = variablesFournee(etat);
+      if (!recette || Object.keys(verifierVariables(recette, variables)).length) return naviguer('#/');
+      onglet = 'fournee';
+      entete = enteteTitre('Récap de la fournée', '#/');
+      contenu = ecranRecap(etat);
+      break;
+    }
     case 'recettes':
       onglet = 'recettes';
       entete = enteteTitre('Recettes');
@@ -164,6 +194,20 @@ function afficher() {
       entete = enteteTitre('Importer une recette', '#/recettes');
       contenu = ecranImport(etat);
       break;
+    case 'carnet': {
+      onglet = 'carnet';
+      if (!route.id) {
+        entete = enteteTitre('Carnet des fournées');
+        contenu = ecranCarnet(etat);
+        break;
+      }
+      const entree = trouverEntree(route.id);
+      if (!entree) return naviguer('#/carnet');
+      etat.brouillon ??= brouillonResultat(entree);
+      entete = enteteTitre(entree.recette.nom, '#/carnet', boutonEnregistrer(resultatModifie(entree, etat.brouillon)));
+      contenu = ecranEntree(etat, entree, etat.brouillon);
+      break;
+    }
     case 'reglages':
       onglet = 'reglages';
       entete = enteteTitre('Réglages');
@@ -202,16 +246,67 @@ function afficher() {
 /* Fournée                                                             */
 /* ================================================================== */
 
+/**
+ * Met à jour les aides de l'écran Fournée sans redessiner les champs en cours de saisie.
+ * remplirLevure : réécrit aussi le champ de la levure (dose saisie ou proposée par la grille).
+ */
+function rafraichirVariables({ remplirLevure = true } = {}) {
+  const { recette, variables } = variablesFournee(etat);
+  if (!recette) return;
+  etat.erreursFournee = {};
+  const champLevure = $('#levure');
+  if (champLevure && remplirLevure) champLevure.value = texteLevure(recette, variables);
+  for (const champ of document.querySelectorAll('#temp-piece, #levure')) champ.removeAttribute('aria-invalid');
+  const zones = {
+    '#aide-boules': html`${pluriel(variables.boules, 'boule')} de ${grammes(recette.poidsBoule)}`,
+    '#aide-temp': aideTemperature(recette, variables),
+    '#aide-levure': aideLevure(recette, variables),
+  };
+  for (const [selecteur, contenu] of Object.entries(zones)) {
+    const zone = $(selecteur);
+    if (zone) zone.innerHTML = String(contenu);
+  }
+}
+
 function changerBoules(valeur, { depuisSaisie = false } = {}) {
   const n = Number(valeur);
   if (!Number.isInteger(n) || n < 1 || n > 99) return; // saisie en cours ou hors limites
   etat.donnees.fournee.boules = n;
   const champ = $('#boules');
   if (champ && !depuisSaisie) champ.value = String(n);
-  const zone = $('#doses');
-  const recette = recetteFournee();
-  if (zone && recette) zone.innerHTML = String(blocDoses(recette, n));
+  rafraichirVariables(); // la dose saisie est gardée en pourcentage : ses grammes suivent les boules
   sauverBientot();
+}
+
+function changerTemperature(texte) {
+  etat.donnees.fournee.tempPiece = lireVariable(texte);
+  rafraichirVariables({ remplirLevure: etat.donnees.fournee.levurePct == null });
+  sauverBientot();
+}
+
+/** Dose tapée dans le champ de la fournée : elle ne vaut que pour cette fournée. */
+function changerLevure(texte) {
+  const { recette, variables } = variablesFournee(etat);
+  const g = lireVariable(texte);
+  const pate = variables.boules * recette.poidsBoule;
+  etat.donnees.fournee.levurePct = g != null && g > 0 && g < pate / 2 ? levureSaisie(recette, variables.boules, g) : null;
+  rafraichirVariables({ remplirLevure: false });
+  sauverBientot();
+}
+
+function validerFournee() {
+  const { recette, variables } = variablesFournee(etat);
+  if (!recette) return;
+  document.activeElement?.blur();
+  const erreurs = verifierVariables(recette, variables);
+  if (Object.keys(erreurs).length) {
+    etat.erreursFournee = erreurs;
+    afficher();
+    etat.erreursFournee = {};
+    return;
+  }
+  sauver();
+  naviguer('#/recap');
 }
 
 /* ================================================================== */
@@ -308,10 +403,29 @@ function saisieDepuisImport() {
 /* Formulaire et suppression                                           */
 /* ================================================================== */
 
+/** Fiche d'une fournée du carnet : bouton « Enregistrer » allumé seulement s'il y a des changements. */
+function majEtatResultat() {
+  const b = etat.brouillon;
+  const entree = b && trouverEntree(b.id);
+  if (!entree) return;
+  const bouton = $('#enregistrer-resultat');
+  if (bouton) bouton.disabled = !resultatModifie(entree, b);
+  const zone = $('#etat-resultat');
+  if (zone) zone.innerHTML = String(etatResultat(entree, b));
+}
+
+/** Garde ce qui est tapé dans le formulaire avant de le redessiner (ligne de grille ajoutée ou retirée). */
+function lireFormulaireOuvert() {
+  const form = $('#form-recette');
+  if (form && etat.formulaire) {
+    etat.formulaire.valeurs = { ...etat.formulaire.valeurs, ...champsDepuisEntrees(new FormData(form)) };
+  }
+}
+
 function enregistrerFormulaire(form) {
   const f = etat.formulaire;
   if (!f) return;
-  const champs = Object.fromEntries(new FormData(form));
+  const champs = champsDepuisEntrees(new FormData(form));
   const existante = f.recetteId ? trouverRecette(f.recetteId) : null;
   const { recette, erreurs } = recetteDepuisFormulaire(champs, existante, f.origine ?? {});
   if (recette && recetteDuMemeNom(etat.donnees.recettes, recette.nom, existante?.id)) {
@@ -417,7 +531,7 @@ function restaurer() {
         const date = exporteLe ? ` du ${new Date(exporteLe).toLocaleDateString('fr-FR')}` : '';
         const ok = await confirmer({
           titre: 'Restaurer cette sauvegarde ?',
-          message: `Sauvegarde${date} : ${pluriel(donnees.recettes.length, 'recette')}. Les recettes actuelles de ce téléphone (${etat.donnees.recettes.length}) seront remplacées.`,
+          message: `Sauvegarde${date} : ${pluriel(donnees.recettes.length, 'recette')}, ${pluriel(donnees.fournees.length, 'fournée')} au carnet. Les données actuelles de ce téléphone seront remplacées.`,
           ok: 'Restaurer',
           danger: true,
         });
@@ -445,10 +559,81 @@ const ACTIONS = {
   moins: () => changerBoules((etat.donnees.fournee.boules ?? 2) - 1),
   plus: () => changerBoules((etat.donnees.fournee.boules ?? 0) + 1),
   utiliser: (bouton) => {
-    etat.donnees.fournee.recetteId = bouton.dataset.id;
+    Object.assign(etat.donnees.fournee, { recetteId: bouton.dataset.id, levurePct: null });
     corrigerFournee();
     sauver();
     naviguer('#/');
+  },
+  'valider-fournee': () => validerFournee(),
+  'ajouter-carnet': () => {
+    const { recette, variables } = variablesFournee(etat);
+    if (!recette || Object.keys(verifierVariables(recette, variables)).length) return;
+    const entree = nouvelleEntree(recette, variables);
+    etat.donnees.fournees.unshift(entree);
+    sauver();
+    naviguer(`#/carnet/${entree.id}`);
+    toast('Fournée ajoutée au carnet. Le résultat se note ici après la cuisson.');
+  },
+  noter: (bouton) => {
+    const b = etat.brouillon;
+    if (!b || b.id !== bouton.dataset.id) return;
+    const note = Number(bouton.dataset.note);
+    b.note = b.note === note ? null : note; // toucher la même étoile retire la note
+    document.querySelectorAll('.etoiles button').forEach((etoile) => {
+      const i = Number(etoile.dataset.note);
+      etoile.classList.toggle('pleine', i <= (b.note ?? 0));
+      etoile.setAttribute('aria-pressed', String(i === b.note));
+    });
+    majEtatResultat();
+  },
+  'enregistrer-resultat': () => {
+    const b = etat.brouillon;
+    const entree = b && trouverEntree(b.id);
+    if (!entree) return;
+    document.activeElement?.blur();
+    enregistrerResultat(entree, b);
+    sauver();
+    majEtatResultat();
+    toast('Résultat enregistré.', { duree: 3000 });
+  },
+  'supprimer-entree': async (bouton) => {
+    const entree = trouverEntree(bouton.dataset.id);
+    if (!entree) return;
+    const ok = await confirmer({
+      titre: 'Supprimer cette fournée ?',
+      message: 'Elle sera retirée du carnet, avec son résultat.',
+      ok: 'Supprimer',
+      danger: true,
+    });
+    if (!ok) return;
+    const index = etat.donnees.fournees.indexOf(entree);
+    etat.donnees.fournees.splice(index, 1);
+    sauver();
+    naviguer('#/carnet');
+    toast('Fournée supprimée.', {
+      action: () => {
+        etat.donnees.fournees.splice(index, 0, entree);
+        sauver();
+        afficher();
+      },
+    });
+  },
+  'levure-grille': () => {
+    etat.donnees.fournee.levurePct = null;
+    rafraichirVariables();
+    sauver();
+  },
+  'ajouter-ligne': () => {
+    lireFormulaireOuvert();
+    etat.formulaire.valeurs.grille.push({ ...LIGNE_VIDE });
+    afficher();
+    const lignes = document.querySelectorAll('.ligne-grille');
+    lignes[lignes.length - 1]?.querySelector('input')?.focus();
+  },
+  'supprimer-ligne': (bouton) => {
+    lireFormulaireOuvert();
+    etat.formulaire.valeurs.grille.splice(Number(bouton.dataset.index), 1);
+    afficher();
   },
   supprimer: (bouton) => supprimerRecette(bouton.dataset.id),
   coller: () => coller(),
@@ -509,8 +694,20 @@ function installerEcouteurs() {
       case 'boules':
         changerBoules(element.value.trim(), { depuisSaisie: true });
         break;
+      case 'temp-piece':
+        changerTemperature(element.value);
+        break;
+      case 'levure':
+        changerLevure(element.value);
+        break;
       case 'texte-import':
         etat.import.texte = element.value;
+        break;
+      case 'commentaire':
+        if (etat.brouillon?.id === element.dataset.id) {
+          etat.brouillon.commentaire = element.value;
+          majEtatResultat();
+        }
         break;
       case 'nom-import': {
         const i = Number(element.dataset.index);
@@ -536,13 +733,23 @@ function installerEcouteurs() {
     }
     switch (element.dataset?.champ) {
       case 'recette':
-        etat.donnees.fournee.recetteId = element.value;
+        // Autre recette : la dose saisie pour la précédente ne vaut plus.
+        Object.assign(etat.donnees.fournee, { recetteId: element.value, levurePct: null });
         sauver();
         afficher();
         break;
       case 'boules':
         // Saisie abandonnée (vide, 0, 120…) : on réaffiche le nombre retenu.
         element.value = String(etat.donnees.fournee.boules ?? '');
+        break;
+      case 'levure':
+        rafraichirVariables(); // remet en forme (« 1,2 » → « 1,20 ») ou reprend la dose de la grille si vidé
+        break;
+      case 'constat':
+        if (etat.brouillon?.id === element.dataset.id) {
+          basculerConstat(etat.brouillon, element.value, element.checked);
+          majEtatResultat();
+        }
         break;
       case 'choix-doublon': {
         const res = etat.import.resultats?.[Number(element.dataset.index)];
@@ -555,7 +762,7 @@ function installerEcouteurs() {
 
   // Touche « OK » du clavier : referme le clavier.
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.matches?.('#boules, [data-champ="nom-import"]')) {
+    if (e.key === 'Enter' && e.target.matches?.('#boules, #temp-piece, #levure, [data-champ="nom-import"]')) {
       e.preventDefault();
       e.target.blur();
     }

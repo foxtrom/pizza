@@ -90,7 +90,7 @@ test('Pizza App : un champ manquant donne une erreur claire et garde ce qui a é
       assert.ok(erreur instanceof ErreurImport);
       assert.match(erreur.message, /Sel \(%\) \(à renseigner\)/);
       assert.equal(erreur.valeurs.boules, 5);
-      assert.equal(erreur.valeurs.levureGrammes, 4.34);
+      assert.equal(erreur.valeurs.grille[0].levure, 4.34);
       return true;
     },
   );

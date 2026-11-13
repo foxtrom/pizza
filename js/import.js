@@ -102,12 +102,11 @@ const LIBELLES_CHAMPS = {
   poidsBoule: 'Poids boule de pâte',
   hydratation: 'Eau (%)',
   sel: 'Sel (%)',
-  levureGrammes: 'Levure',
-  ta: 'TA',
+  'grille.0.levure': 'LBF',
+  'grille.0.temp': 'TA',
+  grille: 'LBF',
   pointage: 'Levage à TA',
   froidHeures: 'Levage à CT',
-  froidMin: 'CT',
-  froidMax: 'CT',
 };
 
 const listeErreurs = (erreurs) =>
@@ -219,8 +218,12 @@ export function lireTextePizzaApp(texte) {
     hydratation: lu.eauPct ?? null,
     sel: lu.selPct ?? null,
     typeLevure: lu.typeLevure ?? 'LBF',
-    levureGrammes: lu.levureG ?? null,
-    ta: lu.ta ?? null,
+    // « TA » et « LBF » : la ligne de la grille à cette température (la dose en grammes,
+    // ou seulement en pourcentage si Pizza App ne donne que celui-ci).
+    grille:
+      lu.levureG != null || lu.levurePct != null
+        ? [{ temp: lu.ta ?? null, levure: lu.levureG ?? null, levurePct: lu.levureG == null ? lu.levurePct : null }]
+        : [],
     pointage: lu.pointage ?? null,
     froidHeures: lu.froidHeures ?? null,
     froidMin: lu.froidTemp?.[0] ?? null,
@@ -229,13 +232,6 @@ export function lireTextePizzaApp(texte) {
   };
   const { recette, erreurs } = recetteDepuisFormulaire(valeurs, null, { source: 'pizzapp', texteImporte: source.trim() });
   if (!recette) throw new ErreurImport(`Champs manquants ou invalides : ${listeErreurs(erreurs)}.`, valeurs);
-
-  // Levure donnée seulement en pourcentage : elle devient directement le relevé à la TA.
-  if (lu.levureG == null && lu.levurePct != null && lu.ta != null) {
-    recette.grille = [{ temp: lu.ta, levure: lu.levurePct, tempEau: null, pointage: null, remise: null }];
-    const [probleme] = verifierRecette(recette);
-    if (probleme) throw new ErreurImport(probleme.message, valeurs);
-  }
   if (!releveDeReference(recette)) avertissements.push('Pas de dose de levure dans le texte : elle sera à compléter.');
 
   const verification = verifierDoses(recette, lu);
