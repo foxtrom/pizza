@@ -48,24 +48,23 @@ export const ILLUSTRATIONS = {
     <circle class="farine-point" cx="37" cy="39" r="1"/>
     <circle class="farine-point" cx="44.5" cy="37" r="0.8"/>
   </svg>`),
+  pizza: brut(`<svg class="illus" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <circle class="illus-disque" cx="32" cy="32" r="32"/>
+    <circle class="pizza-croute" cx="32" cy="32" r="21"/>
+    <circle class="pizza-cuisson" cx="15" cy="27" r="1.6"/>
+    <circle class="pizza-cuisson" cx="24" cy="13.5" r="1.3"/>
+    <circle class="pizza-cuisson" cx="44" cy="15.5" r="1.5"/>
+    <circle class="pizza-cuisson" cx="50.5" cy="35" r="1.3"/>
+    <circle class="pizza-cuisson" cx="37" cy="51" r="1.5"/>
+    <circle class="pizza-cuisson" cx="17.5" cy="43" r="1.2"/>
+    <circle class="pizza-tomate" cx="32" cy="32" r="16.5"/>
+    <circle class="pizza-mozza" cx="26" cy="27" r="4"/>
+    <circle class="pizza-mozza" cx="38" cy="30" r="3.6"/>
+    <circle class="pizza-mozza" cx="30" cy="39" r="3.4"/>
+    <path class="pizza-basilic" d="M32.5 24.5c2.5-2.6 6-2.8 8-1.2-2.2 2.6-5.6 2.9-8 1.2Z"/>
+    <path class="pizza-basilic" d="M36.5 38c1.4-3 4.6-4.2 7-3.4-1.4 3-4.6 4.2-7 3.4Z"/>
+  </svg>`),
 };
-
-/**
- * Silhouette du Puy de Naouri, comme dans Brasserie Ensen, avec une pizza
- * à la place du soleil (même tracé que l'icône de l'appli). Cadrée sur le sommet.
- */
-export const COLLINE = brut(`<svg class="marque-colline" viewBox="0 120 512 250" preserveAspectRatio="xMaxYMax meet" aria-hidden="true" focusable="false">
-  <g class="pizza">
-    <circle class="pizza-croute" cx="336" cy="214" r="60"/>
-    <circle class="pizza-sauce" cx="336" cy="214" r="46"/>
-    <circle class="pizza-mozza" cx="318" cy="198" r="10"/>
-    <circle class="pizza-mozza" cx="355" cy="205" r="9"/>
-    <circle class="pizza-mozza" cx="332" cy="232" r="8"/>
-    <path class="pizza-basilic" d="M333 188c7-8 17-9 23-4-6 8-16 9-23 4Z"/>
-  </g>
-  <path class="crete" d="M-900 352H0C48 338 92 330 134 336C172 341 196 326 236 330C286 336 332 314 384 312C436 310 476 324 512 334V512H-900Z"/>
-  <path class="colline" d="M-900 440H0C70 418 122 380 170 332C210 292 242 256 292 251C332 247 358 264 382 284C400 299 416 300 432 309C462 327 490 366 512 382V512H-900Z"/>
-</svg>`);
 
 /* ---------- Message temporaire (avec « Annuler ») ---------- */
 

@@ -89,7 +89,13 @@ Pour les chiffres clés, le nombre est en gras et l'unité en gris, et les élé
 - Pied blanc : chiffres clés.
 - Une carte qu'on peut choisir reçoit, une fois choisie, un liseré rouge tomate et une coche ronde.
 
-**Carte recette.** En-tête `--farine` avec le dessin d'un pâton. Pied : pâtons, poids, hydratation et durée au frigo.
+**Carte recette.** En-tête `--farine` avec le dessin d'un pâton. Sous le nom, des pastilles : « Fournée » (recette en cours, rouge tomate) et l'état de la levure (grille, référence ou « à compléter »). Pied : pâtons, poids, hydratation et durée au frigo. La même carte sert sur l'écran Fournée (à choisir), dans la liste des recettes et en tête de la fiche.
+
+**Carte du carnet.** En-tête `--farine` avec la date, la recette, les constats en pastilles basilic (ou « Résultat à compléter » en orange) et le dessin d'une pizza. Pied : boules, température de la pièce, levure, note en étoiles, puis le commentaire en italique.
+
+**Pastille.** Petite pilule de 24 px, texte de 12 px en gras : blanche sur l'en-tête teinté, rouge tomate pour la fournée en cours, basilic pour un constat, orange pour ce qui reste à compléter.
+
+**Bloc.** Carte blanche de 26 px d'arrondi, sans bordure, titre de section en petites capitales grises. Il sert aux fiches, au récap, à l'import et aux réglages.
 
 **Carte pizza type** (étape 4).
 - En-tête teinté selon la base : `--tomate-teinte` pour une base tomate, `--creme-teinte` pour une base blanche.
@@ -104,7 +110,7 @@ Pour les chiffres clés, le nombre est en gras et l'unité en gris, et les élé
 
 **Rappel.** Petite carte `--basilic-doux` (dernier résultat) ou `--alerte-doux` (résultat à compléter).
 
-**Barre d'onglets.** Pilule flottante translucide, à 16 px des bords, au-dessus de la zone du geste d'accueil. Icônes au trait fin de 20 px, libellé de 11 px. L'onglet actif a une pastille `--surface-2` et la couleur rouge tomate. Le bouton rond « + » de 56 px (icône de 22 px) est séparé, à droite : il ajoute une recette (import Pizza App ou saisie).
+**Barre d'onglets.** Pilule flottante translucide, à 16 px des bords, au-dessus de la zone du geste d'accueil. Icônes au trait fin de 20 px, libellé de 11 px. L'onglet actif a une pastille `--surface-2` et la couleur rouge tomate. Le bouton rond « + » de 56 px (icône de 22 px) est séparé, à droite : il ajoute une recette (import Pizza App ou saisie). Sous la barre, un voile en dégradé vers la couleur du fond : le contenu s'efface avant d'atteindre la barre, au lieu de passer dessous.
 
 **Compte à rebours** (étape 3).
 - Grande carte, avec l'étape en cours en titre : « Pointage en masse ».
@@ -132,3 +138,5 @@ Les couleurs passent par des variables : les dessins s'adaptent au thème sombre
 ## Barre d'état de l'iPhone
 
 L'appli installée utilise `apple-mobile-web-app-status-bar-style: default` : texte de la barre d'état en noir sur fond clair, en blanc en thème sombre. La couleur `theme-color` suit le thème : crème en clair, presque noir en sombre.
+
+Derrière l'heure et la batterie, la bande est opaque (couleur du fond), prolongée d'un fondu de 10 px : le contenu qui défile ne transparaît jamais derrière la barre d'état.

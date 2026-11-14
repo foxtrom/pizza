@@ -19,7 +19,7 @@ import {
   pourcent,
 } from './outils.js';
 import { recetteDuMemeNom, TYPES_LEVURE } from './recettes.js';
-import { COLLINE, ICONES, ILLUSTRATIONS } from './ui.js';
+import { ICONES, ILLUSTRATIONS } from './ui.js';
 
 const coche = (vrai) => (vrai ? brut('checked') : '');
 const invalide = (message) => (message ? brut('aria-invalid="true"') : '');
@@ -39,9 +39,6 @@ export const enteteGrand = (titre, sousTitre = '', actions = null) => html`<div 
   ${actions ? html`<div class="actions-rondes">${actions}</div>` : ''}
 </div>`;
 
-export const enteteMarque = (devise) =>
-  html`<div class="marque">${COLLINE}<h1>Pizzeria Ensen</h1><p class="devise">${devise}</p></div>`;
-
 export const enteteTitre = (titre, retour = null, droite = null) => html`<div class="barre-titre">
   ${retour ? html`<a class="lien-entete gauche" href="${retour}">${ICONES.retour}<span>Retour</span></a>` : html`<span class="gauche"></span>`}
   <h1>${titre}</h1>
@@ -58,22 +55,38 @@ export const boutonsFormulaire = (retour) => html`
   <button type="submit" form="form-recette" class="btn btn-primaire btn-geant btn-principal">Enregistrer</button>`;
 
 /* ================================================================== */
-/* Résumés d'une recette                                               */
+/* Cartes en deux parties (voir DESIGN.md)                             */
 /* ================================================================== */
 
-const resumeCourt = (r) =>
-  `${r.boules} × ${grammes(r.poidsBoule)}${r.froid.heures != null ? ` · ${duree(r.froid.heures)} au frigo` : ''}`;
+/** Chiffres clés : nombre en gras, unité en gris, séparés par des points. */
+function chiffres(liste) {
+  return liste.map(
+    ([valeur, unite], i) => html`${i ? html`<span class="point" aria-hidden="true">·</span>` : ''}<span class="chiffre"><b>${valeur}</b> ${unite}</span>`,
+  );
+}
 
-export const resumePate = (r) => `${r.boules} × ${grammes(r.poidsBoule)} · eau ${pourcent(r.hydratation)} · sel ${pourcent(r.sel)}`;
+/** Chiffres clés d'une recette : pâtons, poids, hydratation, durée au frigo. */
+function chiffresRecette(r) {
+  const liste = [
+    [r.boules, r.boules >= 2 ? 'pâtons' : 'pâton'],
+    [nombre(r.poidsBoule), 'g'],
+    [nombre(r.hydratation, 1), '% eau'],
+  ];
+  if (r.froid.heures != null) liste.push([nombre(r.froid.heures, 1), 'h frigo']);
+  return chiffres(liste);
+}
 
-export function resumeFermentation(r) {
-  const morceaux = [];
-  if (r.pointage != null) morceaux.push(`pointage ${duree(r.pointage)}`);
-  if (r.froid.heures != null) morceaux.push(`${duree(r.froid.heures)} au frigo`);
-  if (r.grille.length > 1) morceaux.push(`grille ${plage([r.grille[0].temp, r.grille.at(-1).temp], '°C')}`);
-  const releve = releveDeReference(r);
-  morceaux.push(releve ? `${libelleLevure(r)} à ${degres(releve.temp)}` : `${libelleLevure(r)} à compléter`);
-  return morceaux.join(' · ');
+/** Contenu d'une carte recette : en-tête farine (nom, style, pâton), pied (chiffres clés). */
+function contenuCarteRecette(r, { badge = '', marque = '' } = {}) {
+  return html`<span class="carte-tete">
+      <span class="carte-texte">
+        <strong class="carte-nom">${r.nom}</strong>
+        <small class="carte-sous">${[r.style, r.farine].filter(Boolean).join(' · ') || 'Recette'}</small>
+        ${marque}
+      </span>
+      <span class="carte-illus">${ILLUSTRATIONS.paton}${badge}</span>
+    </span>
+    <span class="carte-pied">${chiffresRecette(r)}</span>`;
 }
 
 /* ================================================================== */
@@ -138,14 +151,7 @@ export function ecranFournee(etat, erreurs = {}) {
       ${recettes.map(
         (r) => html`<label class="carte carte-choix">
           <input type="radio" name="recette" value="${r.id}" data-champ="recette" ${coche(r.id === recette.id)}>
-          <span class="carte-tete">
-            <span class="carte-texte">
-              <strong class="carte-nom">${r.nom}</strong>
-              <small class="carte-sous">${[r.style, r.farine].filter(Boolean).join(' · ') || 'Recette'}</small>
-            </span>
-            <span class="carte-illus">${ILLUSTRATIONS.paton}<span class="coche-ronde">${ICONES.coche}</span></span>
-          </span>
-          <span class="carte-pied">${chiffresRecette(r)}</span>
+          ${contenuCarteRecette(r, { badge: html`<span class="coche-ronde">${ICONES.coche}</span>` })}
         </label>`,
       )}
     </div>
@@ -180,18 +186,6 @@ export function ecranFournee(etat, erreurs = {}) {
     <p class="aide centre">Valider ouvre le récap : température de l’eau, pointage, frigo et remise à température.</p>`;
 }
 
-/** Chiffres clés d'une recette : nombre en gras, unité en gris, séparés par des points. */
-function chiffresRecette(r) {
-  const chiffres = [
-    [r.boules, r.boules >= 2 ? 'pâtons' : 'pâton'],
-    [nombre(r.poidsBoule), 'g'],
-    [nombre(r.hydratation, 1), '% eau'],
-  ];
-  if (r.froid.heures != null) chiffres.push([nombre(r.froid.heures, 1), 'h frigo']);
-  return chiffres.map(
-    ([valeur, unite], i) => html`${i ? html`<span class="point" aria-hidden="true">·</span>` : ''}<span class="chiffre"><b>${valeur}</b> ${unite}</span>`,
-  );
-}
 
 /** Valeur lue dans la grille, avec « ≈ » si calculée et « plus de / moins de » au-delà de la grille. */
 function texteLu(lu, format) {
@@ -347,17 +341,30 @@ export function ecranCarnet(etat) {
       <p class="aide">Sur le récap d’une fournée, « Ajouter au carnet » l’enregistre ici. Après la cuisson, y noter le résultat aide à ajuster les fournées suivantes.</p>
     </section>`;
   }
-  return html`<ul class="liste-cartes">${fournees.map(
-    (e) => html`<li><a class="carte" href="#/carnet/${e.id}">
-      <span class="carte-haut">
-        <strong class="carte-nom">${dateFournee(e.date)}</strong>
-        ${aUnResultat(e) ? '' : html`<span class="pastille">À compléter</span>`}
+  return html`<ul class="liste-cartes">${fournees.map((e) => {
+    const commentaire = e.resultat.commentaire.trim();
+    return html`<li><a class="carte carte-lien" href="#/carnet/${e.id}">
+      <span class="carte-tete">
+        <span class="carte-texte">
+          <strong class="carte-nom">${dateFournee(e.date)}</strong>
+          <small class="carte-sous">${e.recette.nom}</small>
+          <span class="pastilles">${aUnResultat(e)
+            ? e.resultat.constats.map((code) => html`<span class="pastille pastille-basilic">${libelleConstat(code)}</span>`)
+            : html`<span class="pastille pastille-alerte">Résultat à compléter</span>`}</span>
+        </span>
+        <span class="carte-illus">${ILLUSTRATIONS.pizza}</span>
       </span>
-      <span class="carte-ligne">${e.recette.nom}</span>
-      <span class="carte-ligne">${pluriel(e.boules, 'boule')} · pièce à ${degres(e.tempPiece)}</span>
-      ${aUnResultat(e) ? html`<span class="carte-ligne resultat-court">${resumeResultat(e)}</span>` : ''}
-    </a></li>`,
-  )}</ul>`;
+      <span class="carte-pied">
+        ${chiffres([
+          [e.boules, e.boules >= 2 ? 'boules' : 'boule'],
+          [nombre(e.tempPiece, 1), '°C'],
+          [e.doses.levure == null ? '—' : nombre(e.doses.levure, 2, 2), `g ${e.recette.typeLevure}`],
+        ])}
+        ${e.resultat.note ? html`<span class="point" aria-hidden="true">·</span><span class="etoiles-texte" aria-label="Note : ${e.resultat.note} sur 5">${etoilesTexte(e.resultat.note)}</span>` : ''}
+        ${commentaire ? html`<span class="carte-note">« ${commentaire.length > 90 ? `${commentaire.slice(0, 90)}…` : commentaire} »</span>` : ''}
+      </span>
+    </a></li>`;
+  })}</ul>`;
 }
 
 /** Sous le résultat : enregistré, ou des changements qui attendent « Enregistrer ». */
@@ -403,23 +410,38 @@ export function ecranEntree(etat, e, brouillon) {
 /* Recettes                                                            */
 /* ================================================================== */
 
+/** Boutons ronds du grand titre « Recettes » : importer depuis Pizza App, saisir à la main. */
+export const actionsRecettes = () => html`
+  <a class="bouton-rond" href="#/importer" aria-label="Importer depuis Pizza App">${ICONES.coller}</a>
+  <a class="bouton-rond" href="#/nouvelle" aria-label="Saisir une recette">${ICONES.crayon}</a>`;
+
+/** État de la levure d'une recette, sous son nom : grille, référence, ou à compléter. */
+function etatLevure(r) {
+  const releve = releveDeReference(r);
+  if (!releve) return html`<span class="pastille pastille-alerte">${libelleLevure(r)} à compléter</span>`;
+  if (r.grille.length > 1) return html`<span class="pastille">Grille ${plage([r.grille[0].temp, r.grille.at(-1).temp], '°C')}</span>`;
+  return html`<span class="pastille">${libelleLevure(r)} à ${degres(releve.temp)}</span>`;
+}
+
 export function ecranRecettes(etat) {
   const { recettes, fournee } = etat.donnees;
-  return html`
-    <div class="deux-boutons">
-      <a class="btn btn-primaire btn-geant" href="#/importer">${ICONES.coller}Importer</a>
-      <a class="btn btn-geant" href="#/nouvelle">${ICONES.crayon}Saisir</a>
-    </div>
-    <p class="aide intro">Importer : coller le texte partagé depuis Pizza App, ou un bloc JSON.</p>
-    ${recettes.length
-      ? html`<ul class="liste-cartes">${recettes.map(
-          (r) => html`<li><a class="carte" href="#/recette/${r.id}">
-            <span class="carte-haut"><strong class="carte-nom">${r.nom}</strong>${r.id === fournee.recetteId ? html`<span class="pastille">Fournée</span>` : ''}</span>
-            <span class="carte-ligne">${resumePate(r)}</span>
-            <span class="carte-ligne">${resumeFermentation(r)}</span>
-          </a></li>`,
-        )}</ul>`
-      : html`<p class="vide">Aucune recette pour l’instant.</p>`}`;
+  if (!recettes.length) {
+    return html`<section class="vide">
+      <p>Aucune recette pour l’instant.</p>
+      <div class="pile-boutons">
+        <a class="btn btn-primaire btn-geant" href="#/importer">${ICONES.coller}Importer depuis Pizza App</a>
+        <a class="btn btn-geant" href="#/nouvelle">${ICONES.crayon}Saisir une recette</a>
+      </div>
+    </section>`;
+  }
+  return html`<ul class="liste-cartes">${recettes.map(
+    (r) => html`<li><a class="carte carte-lien" href="#/recette/${r.id}">
+      ${contenuCarteRecette(r, {
+        marque: html`<span class="pastilles">${r.id === fournee.recetteId ? html`<span class="pastille pastille-accent">Fournée</span>` : ''}${etatLevure(r)}</span>`,
+      })}
+    </a></li>`,
+  )}</ul>
+  <p class="aide centre intro">Importer depuis Pizza App ou saisir : boutons ronds en haut, ou « + » en bas.</p>`;
 }
 
 // Valeurs calculées entre deux températures : arrondies à ce qui sert en cuisine.
@@ -474,10 +496,7 @@ export function ecranRecette(etat, r) {
   const [point1, point2] = r.remiseDefaut;
   const four = r.four;
   return html`
-    <div class="fiche-tete">
-      <p class="aide">${[r.style, r.farine].filter(Boolean).join(' · ') || 'Recette'}</p>
-      <h2 class="fiche-nom">${r.nom}</h2>
-    </div>
+    <section class="carte carte-heros">${contenuCarteRecette(r, { marque: html`<span class="pastilles">${etatLevure(r)}</span>` })}</section>
     <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="utiliser" data-id="${r.id}">${ICONES.part}Préparer une fournée</button>
     <section class="bloc">
       <h3>Pâte de référence</h3>

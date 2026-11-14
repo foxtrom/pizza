@@ -11,6 +11,7 @@ import {
   normaliserDonnees,
 } from './donnees.js';
 import {
+  actionsRecettes,
   aideLevure,
   aideTemperature,
   boutonEnregistrer,
@@ -166,7 +167,7 @@ function afficher() {
     }
     case 'recettes':
       onglet = 'recettes';
-      entete = enteteGrand('Recettes', `${pluriel(etat.donnees.recettes.length, 'recette enregistrée', 'recettes enregistrées')}`);
+      entete = enteteGrand('Recettes', `${pluriel(etat.donnees.recettes.length, 'recette enregistrée', 'recettes enregistrées')}`, actionsRecettes());
       collant = false; // grand titre : défile avec l'écran, comme sur iOS
       contenu = ecranRecettes(etat);
       break;
@@ -180,7 +181,7 @@ function afficher() {
         actions = boutonsFormulaire(`#/recette/${recette.id}`);
       } else {
         onglet = 'recettes';
-        entete = enteteTitre(recette.nom, '#/recettes');
+        entete = enteteTitre(recette.nom, '#/recettes', html`<a class="bouton-rond bouton-rond-petit droite" href="#/recette/${recette.id}/modifier" aria-label="Modifier la recette">${ICONES.crayon}</a>`);
         contenu = ecranRecette(etat, recette);
       }
       break;
