@@ -15,6 +15,7 @@ import {
   aideTemperature,
   boutonEnregistrer,
   boutonsFormulaire,
+  dosesFournee,
   ecranCarnet,
   ecranEntree,
   ecranFormulaire,
@@ -24,7 +25,7 @@ import {
   ecranRecette,
   ecranRecettes,
   ecranReglages,
-  enteteMarque,
+  enteteGrand,
   enteteTitre,
   etatResultat,
   texteLevure,
@@ -44,7 +45,7 @@ import {
   valeursEnTexte,
   valeursFormulaire,
 } from './recettes.js';
-import { confirmer, fermerFeuille, toast } from './ui.js';
+import { confirmer, fermerFeuille, ICONES, ouvrirFeuille, toast } from './ui.js';
 
 const $ = (selecteur) => document.querySelector(selecteur);
 const CLE_THEME = 'pizzeria-theme'; // distincte de celle de Brasserie Ensen (même domaine github.io)
@@ -151,8 +152,8 @@ function afficher() {
   switch (route.page) {
     case '':
       onglet = 'fournee';
-      collant = false;
-      entete = enteteMarque('Préparer une fournée');
+      entete = enteteGrand('Fournée', 'Pizzeria Ensen · la pâte du jour');
+      collant = false; // grand titre : défile avec l'écran, comme sur iOS
       contenu = ecranFournee(etat, etat.erreursFournee);
       break;
     case 'recap': {
@@ -165,7 +166,8 @@ function afficher() {
     }
     case 'recettes':
       onglet = 'recettes';
-      entete = enteteTitre('Recettes');
+      entete = enteteGrand('Recettes', `${pluriel(etat.donnees.recettes.length, 'recette enregistrée', 'recettes enregistrées')}`);
+      collant = false; // grand titre : défile avec l'écran, comme sur iOS
       contenu = ecranRecettes(etat);
       break;
     case 'recette': {
@@ -197,7 +199,8 @@ function afficher() {
     case 'carnet': {
       onglet = 'carnet';
       if (!route.id) {
-        entete = enteteTitre('Carnet des fournées');
+        entete = enteteGrand('Carnet', `${pluriel(etat.donnees.fournees.length, 'fournée', 'fournées')} au carnet`);
+        collant = false; // grand titre : défile avec l'écran, comme sur iOS
         contenu = ecranCarnet(etat);
         break;
       }
@@ -210,7 +213,8 @@ function afficher() {
     }
     case 'reglages':
       onglet = 'reglages';
-      entete = enteteTitre('Réglages');
+      entete = enteteGrand('Réglages', 'Thème, sauvegarde, version');
+      collant = false; // grand titre : défile avec l'écran, comme sur iOS
       contenu = ecranReglages(etat);
       break;
     default:
@@ -226,6 +230,7 @@ function afficher() {
   const avecActions = String(actions).trim() !== '';
   const onglets = $('#onglets');
   onglets.hidden = avecActions;
+  $('#bouton-plus').hidden = avecActions;
   document.body.classList.toggle('avec-onglets', !avecActions);
   document.body.classList.toggle('avec-actions', avecActions);
   for (const lien of onglets.querySelectorAll('a')) {
@@ -236,6 +241,11 @@ function afficher() {
   }
 
   if (nouvellePage) {
+    // Petite apparition de l'écran (désactivée si l'iPhone demande moins d'animations).
+    const vue = $('#vue');
+    vue.classList.remove('apparait');
+    void vue.offsetWidth;
+    vue.classList.add('apparait');
     window.scrollTo(0, 0);
     $('#vue').focus({ preventScroll: true });
   }
@@ -261,6 +271,7 @@ function rafraichirVariables({ remplirLevure = true } = {}) {
     '#aide-boules': html`${pluriel(variables.boules, 'boule')} de ${grammes(recette.poidsBoule)}`,
     '#aide-temp': aideTemperature(recette, variables),
     '#aide-levure': aideLevure(recette, variables),
+    '#doses-fournee': dosesFournee(recette, variables),
   };
   for (const [selecteur, contenu] of Object.entries(zones)) {
     const zone = $(selecteur);
@@ -647,6 +658,20 @@ const ACTIONS = {
   exporter: () => exporter(),
   restaurer: () => restaurer(),
   'fermer-feuille': () => fermerFeuille(),
+  'ajouter-recette': () => {
+    ouvrirFeuille(html`<div class="feuille-contenu">
+      <h2 tabindex="-1" autofocus>Ajouter une recette</h2>
+      <div class="pile-boutons">
+        <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="aller" data-cible="#/importer">${ICONES.coller}Importer depuis Pizza App</button>
+        <button type="button" class="btn btn-geant btn-large" data-action="aller" data-cible="#/nouvelle">${ICONES.crayon}Saisir une recette</button>
+        <button type="button" class="btn btn-discret btn-large" data-action="fermer-feuille">Annuler</button>
+      </div>
+    </div>`);
+  },
+  aller: (bouton) => {
+    fermerFeuille();
+    naviguer(bouton.dataset.cible);
+  },
 };
 
 const FORMULAIRES = {

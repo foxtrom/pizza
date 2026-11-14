@@ -97,6 +97,7 @@ export function calculerFournee(recette, variables) {
     remise,
     froid: recette.froid,
     tempPate: recette.tempPate,
-    horsGrille: plage && plage[0] < plage[1] && (tempPiece < plage[0] || tempPiece > plage[1]) ? plage : null,
+    horsGrille:
+      tempPiece != null && plage && plage[0] < plage[1] && (tempPiece < plage[0] || tempPiece > plage[1]) ? plage : null,
   };
 }

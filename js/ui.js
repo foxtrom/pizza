@@ -26,8 +26,28 @@ export const ICONES = {
   alerte: icone('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>'),
   moins: icone('<path d="M5 12h14"/>', 3),
   plus: icone('<path d="M12 5v14M5 12h14"/>', 3),
+  plusFin: icone('<path d="M12 4.5v15M4.5 12h15"/>', 2.25),
+  coche: icone('<path d="M20 6 9 17l-5-5"/>', 3),
   exporter: icone('<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>'),
   restaurer: icone('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>'),
+};
+
+/**
+ * Illustrations rondes des cartes (64 px), dessinées pour l'appli. Couleurs en
+ * variables CSS (classes illus-…) : elles suivent le thème clair ou sombre.
+ */
+export const ILLUSTRATIONS = {
+  paton: brut(`<svg class="illus" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <circle class="illus-disque" cx="32" cy="32" r="32"/>
+    <ellipse class="illus-ombre" cx="32" cy="45.5" rx="18.5" ry="4.5"/>
+    <path class="paton" d="M13 40.5C13 29 21.5 20 32 20s19 9 19 20.5c0 3.6-8.5 5.5-19 5.5s-19-1.9-19-5.5Z"/>
+    <path class="paton-dessous" d="M13.6 42.6c2.6 2.2 9.6 3.4 18.4 3.4s15.8-1.2 18.4-3.4c-.6 2.4-8.4 4.2-18.4 4.2s-17.8-1.8-18.4-4.2Z"/>
+    <path class="paton-reflet" d="M21 30.5c2.6-3.6 6.4-5.6 10.8-6"/>
+    <circle class="farine-point" cx="40" cy="31" r="1.1"/>
+    <circle class="farine-point" cx="26" cy="37" r="0.9"/>
+    <circle class="farine-point" cx="37" cy="39" r="1"/>
+    <circle class="farine-point" cx="44.5" cy="37" r="0.8"/>
+  </svg>`),
 };
 
 /**

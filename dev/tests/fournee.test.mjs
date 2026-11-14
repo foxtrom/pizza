@@ -87,6 +87,14 @@ test('hors de la grille : valeur du bord avec le sens de l’écart, et alerte',
   assert.deepEqual([chaud.pointage.valeur, chaud.pointage.limite], [1, 'moins']);
 });
 
+test('doses affichées avant de saisir la température : levure à compléter, pas d’alerte', () => {
+  const f = calculerFournee(recette48h(), { boules: 4, tempPiece: null, levurePct: null });
+  assert.deepEqual([f.doses.farine, f.doses.eau, f.doses.sel, f.doses.levure], [647, 453, 19, null]);
+  assert.deepEqual(f.eau, { total: 453, premier: 385, bassinage: 68, pctPremier: 85 });
+  assert.equal(f.horsGrille, null);
+  assert.equal(f.pointage, null);
+});
+
 test('variables : température et levure obligatoires avant le récap', () => {
   const recette = recette48h();
   assert.deepEqual(verifierVariables(recette, { boules: 4, tempPiece: null, levurePct: null }), { tempPiece: 'À renseigner.' });

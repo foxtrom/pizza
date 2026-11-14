@@ -6,7 +6,7 @@ Appli web statique (HTML, CSS, JavaScript, sans dépendance), installable sur l'
 
 **Étape 1** : import du texte Pizza App ou d'un bloc JSON, saisie manuelle, recalcul des doses selon le nombre de boules, sauvegarde, fonctionnement hors ligne.
 
-**Étape 2 (version 0.2.0)** : les recettes sont des modèles. Une fournée part des variables du jour : nombre de boules, température de la pièce et dose de levure. La dose est proposée par la grille de la recette, calculée entre deux températures si besoin, et peut être corrigée pour cette fournée seulement. « Valider » ouvre le récap :
+**Étape 2 (version 0.2.0)** : les recettes sont des modèles. Une fournée part des variables du jour : nombre de boules, température de la pièce et dose de levure. La dose est proposée par la grille de la recette, calculée entre deux températures si besoin, et peut être corrigée pour cette fournée seulement. Les doses complètes (farine, eau en deux versements, sel, levure) s'affichent en direct sous les variables. « Valider » ouvre le récap :
 - les doses, avec l'eau en deux versements (85 % puis bassinage, réglable dans chaque recette) ;
 - la température de l'eau ;
 - les durées de pointage, de frigo et de remise à température.

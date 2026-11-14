@@ -19,7 +19,7 @@ import {
   pourcent,
 } from './outils.js';
 import { recetteDuMemeNom, TYPES_LEVURE } from './recettes.js';
-import { COLLINE, ICONES } from './ui.js';
+import { COLLINE, ICONES, ILLUSTRATIONS } from './ui.js';
 
 const coche = (vrai) => (vrai ? brut('checked') : '');
 const invalide = (message) => (message ? brut('aria-invalid="true"') : '');
@@ -29,6 +29,15 @@ const dateLisible = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'n
 /* ================================================================== */
 /* En-têtes et barre d'actions                                         */
 /* ================================================================== */
+
+/** Grand titre façon iOS, sous-titre discret, boutons ronds éventuels à droite (écrans des onglets). */
+export const enteteGrand = (titre, sousTitre = '', actions = null) => html`<div class="entete-grand">
+  <div>
+    <h1>${titre}</h1>
+    ${sousTitre ? html`<p class="sous-titre">${sousTitre}</p>` : ''}
+  </div>
+  ${actions ? html`<div class="actions-rondes">${actions}</div>` : ''}
+</div>`;
 
 export const enteteMarque = (devise) =>
   html`<div class="marque">${COLLINE}<h1>Pizzeria Ensen</h1><p class="devise">${devise}</p></div>`;
@@ -124,42 +133,64 @@ export function ecranFournee(etat, erreurs = {}) {
   }
   const { recette, variables: f } = variablesFournee(etat);
   return html`
-    <fieldset class="choix-recettes">
-      <legend>Recette</legend>
+    <h2 class="titre-section">Recette</h2>
+    <div class="choix-recettes" role="radiogroup" aria-label="Recette">
       ${recettes.map(
-        (r) => html`<label class="choix-recette">
+        (r) => html`<label class="carte carte-choix">
           <input type="radio" name="recette" value="${r.id}" data-champ="recette" ${coche(r.id === recette.id)}>
-          <span><strong>${r.nom}</strong><small>${resumeCourt(r)}</small></span>
+          <span class="carte-tete">
+            <span class="carte-texte">
+              <strong class="carte-nom">${r.nom}</strong>
+              <small class="carte-sous">${[r.style, r.farine].filter(Boolean).join(' · ') || 'Recette'}</small>
+            </span>
+            <span class="carte-illus">${ILLUSTRATIONS.paton}<span class="coche-ronde">${ICONES.coche}</span></span>
+          </span>
+          <span class="carte-pied">${chiffresRecette(r)}</span>
         </label>`,
       )}
-    </fieldset>
+    </div>
     ${rappelFournees(etat, recette)}
-    <fieldset class="variable">
-      <legend>Nombre de boules</legend>
-      <div class="compteur-boules">
-        <button type="button" class="btn btn-compteur" data-action="moins" aria-label="Une boule de moins">${ICONES.moins}</button>
-        <input id="boules" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="${f.boules}" data-champ="boules" aria-label="Nombre de boules" autocomplete="off" enterkeyhint="done">
-        <button type="button" class="btn btn-compteur" data-action="plus" aria-label="Une boule de plus">${ICONES.plus}</button>
-      </div>
-      <p class="aide centre" id="aide-boules">${pluriel(f.boules, 'boule')} de ${grammes(recette.poidsBoule)}</p>
-    </fieldset>
-    <fieldset class="variable">
-      <legend>Température de la pièce</legend>
-      <label class="champ-geant">
-        <input id="temp-piece" type="text" inputmode="decimal" value="${f.tempPiece == null ? '' : nombre(f.tempPiece, 1)}" data-champ="temp-piece" aria-label="Température de la pièce" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.tempPiece)}>
-        <span class="unite">°C</span>
+    <h2 class="titre-section">Nombre de boules</h2>
+    <div class="compteur-boules">
+      <button type="button" class="btn-compteur" data-action="moins" aria-label="Une boule de moins">${ICONES.moins}</button>
+      <input id="boules" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="${f.boules}" data-champ="boules" aria-label="Nombre de boules" autocomplete="off" enterkeyhint="done">
+      <button type="button" class="btn-compteur" data-action="plus" aria-label="Une boule de plus">${ICONES.plus}</button>
+    </div>
+    <h2 class="titre-section">Variables du jour</h2>
+    <div class="variables-duo">
+      <label class="champ-carte">
+        <span class="libelle-carte">Pièce</span>
+        <span class="valeur">
+          <input id="temp-piece" type="text" inputmode="decimal" value="${f.tempPiece == null ? '' : nombre(f.tempPiece, 1)}" data-champ="temp-piece" aria-label="Température de la pièce" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.tempPiece)}>
+          <span class="unite">°C</span>
+        </span>
       </label>
-      <div id="aide-temp">${aideTemperature(recette, f, erreurs.tempPiece)}</div>
-    </fieldset>
-    <fieldset class="variable">
-      <legend>Levure (${libelleLevure(recette)})</legend>
-      <label class="champ-geant">
-        <input id="levure" type="text" inputmode="decimal" value="${texteLevure(recette, f)}" data-champ="levure" aria-label="Dose de levure en grammes" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.levure)}>
-        <span class="unite">g</span>
+      <label class="champ-carte">
+        <span class="libelle-carte">Levure ${libelleLevure(recette)}</span>
+        <span class="valeur">
+          <input id="levure" type="text" inputmode="decimal" value="${texteLevure(recette, f)}" data-champ="levure" aria-label="Dose de levure en grammes" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.levure)}>
+          <span class="unite">g</span>
+        </span>
       </label>
-      <div id="aide-levure">${aideLevure(recette, f, erreurs.levure)}</div>
-    </fieldset>
-    <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="valider-fournee">Valider</button>`;
+    </div>
+    <div id="aide-temp">${aideTemperature(recette, f, erreurs.tempPiece)}</div>
+    <div id="aide-levure">${aideLevure(recette, f, erreurs.levure)}</div>
+    <div id="doses-fournee">${dosesFournee(recette, f)}</div>
+    <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="valider-fournee">Valider</button>
+    <p class="aide centre">Valider ouvre le récap : température de l’eau, pointage, frigo et remise à température.</p>`;
+}
+
+/** Chiffres clés d'une recette : nombre en gras, unité en gris, séparés par des points. */
+function chiffresRecette(r) {
+  const chiffres = [
+    [r.boules, r.boules >= 2 ? 'pâtons' : 'pâton'],
+    [nombre(r.poidsBoule), 'g'],
+    [nombre(r.hydratation, 1), '% eau'],
+  ];
+  if (r.froid.heures != null) chiffres.push([nombre(r.froid.heures, 1), 'h frigo']);
+  return chiffres.map(
+    ([valeur, unite], i) => html`${i ? html`<span class="point" aria-hidden="true">·</span>` : ''}<span class="chiffre"><b>${valeur}</b> ${unite}</span>`,
+  );
 }
 
 /** Valeur lue dans la grille, avec « ≈ » si calculée et « plus de / moins de » au-delà de la grille. */
@@ -172,21 +203,52 @@ function texteLu(lu, format) {
 const formatDuree = (h) => (Array.isArray(h) ? plageDuree(h.map(cinqMinutes)) : duree(cinqMinutes(h)));
 
 /**
+ * Les doses d'une fournée (farine, eau en deux versements, sel, levure), à partir
+ * de sa photo figée : sur l'écran Fournée en direct, dans le récap et dans le carnet.
+ */
+function carteDoses(s, { titre = 'Doses' } = {}) {
+  const r = s.recette;
+  const d = s.doses;
+  const origineLevure = {
+    saisie: 'dose saisie pour cette fournée',
+    grille: `dose de la grille pour ${s.tempPiece == null ? '' : degres(s.tempPiece)}`,
+    calculee: 'calculée entre deux températures de la grille',
+  }[s.levure?.source] ?? '';
+  const ligne = (nom, detail, valeur, classe = '') => html`<li class="dose ${classe}">
+    <span class="dose-nom">${nom}${detail ? html`<small>${detail}</small>` : ''}</span>
+    <span class="dose-valeur">${valeur}</span>
+  </li>`;
+  return html`<section class="carte carte-doses recap-doses">
+    <div class="carte-tete">
+      <span class="carte-texte">
+        <strong class="carte-nom">${titre}</strong>
+        <small class="carte-sous"><b>${grammes(d.pate)}</b> de pâte · ${pluriel(s.boules, 'boule')} de ${grammes(r.poidsBoule)}</small>
+      </span>
+    </div>
+    <ul class="doses carte-pied">
+      ${ligne('Farine', r.farine, grammes(d.farine))}
+      ${ligne('Eau', `${pourcent(r.hydratation)} de la farine`, grammes(s.eau.total))}
+      <li class="versement"><span>1<sup>er</sup> versement · ${pourcent(s.eau.pctPremier, 1)}</span><strong>${grammes(s.eau.premier)}</strong></li>
+      <li class="versement"><span>Bassinage</span><strong>${grammes(s.eau.bassinage)}</strong></li>
+      ${ligne('Sel', pourcent(r.sel), grammes(d.sel))}
+      ${d.levure == null
+        ? ligne(libelleLevure(r), 'à compléter', '—', 'dose-manquante')
+        : ligne(libelleLevure(r), `${pourcent(s.levure.pct, 3)} · ${origineLevure}`, grammes(d.levure, 2))}
+    </ul>
+  </section>`;
+}
+
+/** Doses de la fournée en cours, recalculées à chaque changement de variable. */
+export function dosesFournee(recette, variables) {
+  return carteDoses(instantane(recette, calculerFournee(recette, variables)), { titre: 'Doses de la fournée' });
+}
+
+/**
  * Récap d'une fournée à partir de sa photo figée (voir carnet.js) : sert pour la
  * fournée du jour comme pour une fournée du carnet.
  */
 function vueRecap(s) {
   const r = s.recette;
-  const d = s.doses;
-  const origineLevure = {
-    saisie: 'dose saisie pour cette fournée',
-    grille: `dose de la grille pour ${degres(s.tempPiece)}`,
-    calculee: 'calculée entre deux températures de la grille',
-  }[s.levure?.source] ?? '';
-  const ligne = (nom, detail, valeur) => html`<li class="dose">
-    <span class="dose-nom">${nom}${detail ? html`<small>${detail}</small>` : ''}</span>
-    <span class="dose-valeur">${valeur}</span>
-  </li>`;
   const [p1, p2] = r.remiseDefaut;
   const notePointage = !s.pointage
     ? 'non précisé dans la recette'
@@ -208,19 +270,7 @@ function vueRecap(s) {
     ${s.horsGrille
       ? html`<p class="banniere banniere-alerte">${ICONES.alerte}<span>La pièce est hors de la grille de la recette (${plage(s.horsGrille, '°C')}) : durées et température de l’eau sont indicatives.</span></p>`
       : ''}
-    <section class="carte-doses recap-doses">
-      <p class="pate-totale"><strong>${grammes(d.pate)}</strong> de pâte</p>
-      <ul class="doses">
-        ${ligne('Farine', r.farine, grammes(d.farine))}
-        ${ligne('Eau', `${pourcent(r.hydratation)} de la farine`, grammes(s.eau.total))}
-        <li class="versement"><span>1<sup>er</sup> versement · ${pourcent(s.eau.pctPremier, 1)}</span><strong>${grammes(s.eau.premier)}</strong></li>
-        <li class="versement"><span>Bassinage</span><strong>${grammes(s.eau.bassinage)}</strong></li>
-        ${ligne('Sel', pourcent(r.sel), grammes(d.sel))}
-        ${d.levure == null
-          ? ligne(libelleLevure(r), 'à compléter', '—')
-          : ligne(libelleLevure(r), `${pourcent(s.levure.pct, 3)} · ${origineLevure}`, grammes(d.levure, 2))}
-      </ul>
-    </section>
+    ${carteDoses(s)}
     <section class="bloc">
       <h3>Pétrissage</h3>
       <dl class="infos">
