@@ -1,0 +1,538 @@
+/* Pizzeria Ensen — système de design (refonte visuelle, composants dans js/composants.js).
+   Même démarche que Brasserie Ensen : jetons sémantiques (--e-…) et composants (.e-…),
+   aux couleurs de la pizzeria : rouge tomate, farine, basilic. Le guide est dans DESIGN.md.
+   Tailles en rem : elles suivent la taille du texte choisie sur l'iPhone (Dynamic Type).
+   Barre d'onglets, barre de titre et bouton « + » restent en px, comme sur iOS.
+   css/app.css, chargé après, porte la mise en page et les composants propres à l'appli
+   (cartes en deux parties, compteur, doses, grille). */
+
+/* ---------- Taille de base : celle de l'iPhone (Dynamic Type) ---------- */
+
+html { font-size: 17px; }
+/* iPhone seulement (-webkit-touch-callout) : sur Mac, la taille « body » du système vaut 13 px. */
+@supports (font: -apple-system-body) and (-webkit-touch-callout: none) {
+  html { font: -apple-system-body; }
+}
+
+/* ---------- Jetons : clair ---------- */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --e-fond: #f4efe8; /* crème chaud */
+  --e-fond-translucide: rgb(244 239 232 / 0.88);
+  --e-surface: #ffffff;
+  --e-surface-translucide: rgb(255 255 255 / 0.84);
+  --e-surface-2: #ebe4da; /* champs, pistes des sélecteurs, versements d'eau */
+  --e-bordure: #e8e1d7; /* décor : séparation douce, jamais seule porteuse d'information */
+
+  /* Textes (contrastes sur le fond, la carte, la surface 2 et la farine) */
+  --e-texte: #1d1a17; /* 13,7 à 17,4:1 */
+  --e-texte-2: #6d6359; /* 4,7 à 5,9:1 (au lieu de #877d72, à 3,2:1 sur la surface 2) */
+  --e-texte-3: #a69b8e; /* décor seulement : points, éléments inactifs */
+
+  /* Rouge tomate : action principale, liens, sélection */
+  --e-tomate: #b8341b; /* blanc dessus 5,9:1 ; sur le fond 5,2:1, sur la surface 2 4,7:1 (au lieu de #c2391f, à 4,3:1) */
+  --e-tomate-presse: #9e2c16;
+  --e-sur-tomate: #ffffff;
+  --e-tomate-doux: #fbe4dc;
+  --e-tomate-texte: #9e2c16; /* sur tomate douce 6,1:1, sur la farine 6,4:1 */
+  --e-tomate-ombre: rgb(184 52 27 / 0.26);
+
+  /* Farine : en-tête des cartes, disque des illustrations, pâton */
+  --e-farine: #f7ecd8;
+  --e-farine-fonce: #ecdcbf;
+  --e-paton: #fffaf1;
+  --e-paton-ombre: #dcc8a4;
+
+  /* Basilic : succès, « identique à Pizza App », dernier résultat */
+  --e-basilic-doux: #e2efda;
+  --e-basilic-texte: #2f6a2b; /* sur basilic doux 5,5:1 (au lieu de #3d7a37, à 4,4:1) */
+
+  /* Alerte (à compléter, hors grille), erreur, information */
+  --e-alerte-fond: #fbe9cc;
+  --e-alerte-texte: #9c5600; /* 4,7:1 */
+  --e-erreur: #b3261e; /* 5,2 à 6,5:1 */
+  --e-erreur-fond: #f9e0dc;
+  --e-erreur-plein: #b3261e; /* bouton de la confirmation : blanc dessus 6,5:1 */
+  --e-info: #255f7e;
+  --e-info-doux: #dae9f1;
+
+  /* Sélecteur (Auto · Clair · Sombre) et message temporaire */
+  --e-segment-actif: #ffffff;
+  --e-segment-texte: #b8341b;
+  --e-message-fond: #2a2420;
+  --e-message-bord: rgb(255 255 255 / 0.08);
+  --e-message-texte: #f7ecd9;
+  --e-message-action: #ff9a80; /* 7,4:1 */
+
+  /* Teintes des pizzas types (étape 4) */
+  --e-tomate-teinte: #f8dcd2;
+  --e-creme-teinte: #f6eedf;
+
+  /* Ombres : douce (cartes, boutons ronds), flottante (onglets, « + », messages) */
+  --e-ombre: 0 1px 2px rgb(70 45 20 / 0.04), 0 8px 24px rgb(70 45 20 / 0.06);
+  --e-ombre-flottante: 0 10px 30px rgb(50 30 10 / 0.12), 0 2px 6px rgb(50 30 10 / 0.05);
+
+  /* Flèche des menus déroulants, à la couleur du texte secondaire */
+  --e-fleche: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236d6359' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+
+  /* Espacements (4, 8, 12, 16, 24, 32) et rayons */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 24px;
+  --e-6: 32px;
+  --e-r-carte: 26px;
+  --e-r-champ: 18px;
+  --e-r-pilule: 999px;
+
+  /* Polices système Apple */
+  --e-police: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --e-police-arrondie: ui-rounded, -apple-system, "SF Pro Rounded", "Segoe UI", sans-serif;
+  --e-police-code: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ---------- Jetons : sombre (choix manuel, puis réglage de l'iPhone) ---------- */
+
+:root[data-theme="sombre"] {
+  color-scheme: dark;
+  --e-fond: #141210;
+  --e-fond-translucide: rgb(20 18 16 / 0.86);
+  --e-surface: #1f1c19;
+  --e-surface-translucide: rgb(38 34 30 / 0.84);
+  --e-surface-2: #3a3430; /* champs, pistes : 1,38:1 sur la carte (au lieu de 1,16:1) */
+  --e-bordure: #38322d;
+  --e-texte: #f3eee7;
+  --e-texte-2: #b3aa9e; /* 5,3 à 8,2:1 */
+  --e-texte-3: #847a6f;
+  --e-tomate: #ff7a5c; /* 4,8 à 7,3:1 */
+  --e-tomate-presse: #ff9479;
+  --e-sur-tomate: #1f0d07;
+  --e-tomate-doux: #3d221b;
+  --e-tomate-texte: #ff9a80;
+  --e-tomate-ombre: rgb(0 0 0 / 0.35);
+  --e-farine: #2b251d;
+  --e-farine-fonce: #3a3126;
+  --e-paton: #efe3cc;
+  --e-paton-ombre: #b9a27c;
+  --e-basilic-doux: #1f2e1d;
+  --e-basilic-texte: #8fcf86;
+  --e-alerte-fond: #3b2a12;
+  --e-alerte-texte: #f3b25c;
+  --e-erreur: #ff8e85;
+  --e-erreur-fond: #3e1e17;
+  --e-erreur-plein: #c4362c;
+  --e-info: #8cc4e3;
+  --e-info-doux: #16293a;
+  --e-segment-actif: #544b43; /* choix actif plus clair que la piste, comme sur iOS */
+  --e-segment-texte: #ffb39f; /* 5,0:1 */
+  --e-message-fond: #4a423b; /* message temporaire plus clair que les cartes */
+  --e-message-bord: rgb(255 255 255 / 0.16);
+  --e-tomate-teinte: #3a201a;
+  --e-creme-teinte: #2d281f;
+  --e-ombre: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.25);
+  --e-ombre-flottante: 0 10px 30px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
+  --e-fleche: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3aa9e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="clair"]) {
+    color-scheme: dark;
+    --e-fond: #141210;
+    --e-fond-translucide: rgb(20 18 16 / 0.86);
+    --e-surface: #1f1c19;
+    --e-surface-translucide: rgb(38 34 30 / 0.84);
+    --e-surface-2: #3a3430;
+    --e-bordure: #38322d;
+    --e-texte: #f3eee7;
+    --e-texte-2: #b3aa9e;
+    --e-texte-3: #847a6f;
+    --e-tomate: #ff7a5c;
+    --e-tomate-presse: #ff9479;
+    --e-sur-tomate: #1f0d07;
+    --e-tomate-doux: #3d221b;
+    --e-tomate-texte: #ff9a80;
+    --e-tomate-ombre: rgb(0 0 0 / 0.35);
+    --e-farine: #2b251d;
+    --e-farine-fonce: #3a3126;
+    --e-paton: #efe3cc;
+    --e-paton-ombre: #b9a27c;
+    --e-basilic-doux: #1f2e1d;
+    --e-basilic-texte: #8fcf86;
+    --e-alerte-fond: #3b2a12;
+    --e-alerte-texte: #f3b25c;
+    --e-erreur: #ff8e85;
+    --e-erreur-fond: #3e1e17;
+    --e-erreur-plein: #c4362c;
+    --e-info: #8cc4e3;
+    --e-info-doux: #16293a;
+    --e-segment-actif: #544b43;
+    --e-segment-texte: #ffb39f;
+    --e-message-fond: #4a423b;
+    --e-message-bord: rgb(255 255 255 / 0.16);
+    --e-tomate-teinte: #3a201a;
+    --e-creme-teinte: #2d281f;
+    --e-ombre: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.25);
+    --e-ombre-flottante: 0 10px 30px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
+    --e-fleche: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3aa9e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+/* ---------- Typographie (rem : suit la taille du texte de l'iPhone) ---------- */
+
+.e-titre-section {
+  margin: 0;
+  color: var(--e-texte-2);
+  font: 650 0.8125rem/1.3 var(--e-police);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.e-texte { margin: 0; font: 400 1rem/1.45 var(--e-police); color: var(--e-texte); }
+.e-secondaire { margin: 0; font: 400 0.875rem/1.4 var(--e-police); color: var(--e-texte-2); }
+.e-chiffre { font-family: var(--e-police-arrondie); font-variant-numeric: tabular-nums; }
+.e-insecable { white-space: nowrap; } /* « 285 g » ne se coupe pas */
+.e-cache { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* pour VoiceOver */
+
+/* Icônes au trait fin (SVG maison) */
+.e-icone { width: 1.25rem; height: 1.25rem; flex: none; }
+
+/* Liste « 5 pâtons · 285 g · 70 % eau » : chaque élément porte son point, et le point qui
+   ouvrirait une nouvelle ligne est masqué (décalé à gauche, coupé par .e-ligne-points). */
+.e-ligne-points { display: block; overflow: hidden; }
+.e-points { display: flex; flex-wrap: wrap; margin-left: -1em; }
+/* Retrait suspendu : si un élément trop long se coupe lui-même, sa 2e ligne reste visible */
+.e-points > span { min-width: 0; padding-left: 1em; text-indent: -1em; }
+.e-points > span::before { content: "·"; display: inline-block; width: 1em; text-align: center; text-indent: 0; color: var(--e-texte-3); }
+.e-points > span > * { text-indent: 0; } /* la note « ★ 4/5 » (inline-flex) n'hérite pas du retrait */
+
+/* ---------- Badges (pastilles) : toujours un texte, une icône pour les états à surveiller ---------- */
+
+.e-badges { display: flex; flex-wrap: wrap; gap: var(--e-1) 6px; }
+.e-badges:empty { display: none; }
+.e-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 1.5rem;
+  padding: 2px 10px;
+  border-radius: var(--e-r-pilule);
+  background: var(--e-surface);
+  color: var(--e-texte-2);
+  font: 650 0.75rem/1.2 var(--e-police);
+}
+.e-badge:has(> .e-icone) { padding-left: 7px; }
+.e-badge .e-icone { width: 0.875rem; height: 0.875rem; }
+.e-badge--fournee { background: var(--e-tomate); color: var(--e-sur-tomate); }
+.e-badge--alerte { background: var(--e-alerte-fond); color: var(--e-alerte-texte); }
+.e-badge--ok { background: var(--e-basilic-doux); color: var(--e-basilic-texte); }
+
+/* ---------- Note : compacte « ★ 4/5 », ou modifiable (★ pleine, ☆ vide) ---------- */
+
+.e-note { display: inline-flex; align-items: baseline; gap: 3px; color: var(--e-texte); font-weight: 650; white-space: nowrap; }
+.e-note .e-etoile { color: var(--e-tomate); }
+
+/* La forme de l'étoile suffit à lire la note, sans dépendre de la couleur ; cibles de 44 px au moins */
+.e-note-edition { display: flex; margin: -4px 0 var(--e-3) -0.5rem; }
+.e-note-edition button {
+  appearance: none;
+  width: max(48px, min(3rem, 60px)); /* plafonné : cinq étoiles tiennent toujours sur la largeur */
+  height: max(48px, min(3rem, 64px));
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: var(--e-texte-2);
+  font: 400 min(2rem, 40px)/1 var(--e-police);
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.e-note-edition button.pleine { color: var(--e-tomate); }
+.e-note-edition button:active { transform: scale(0.9); }
+.e-note-edition button:focus-visible { outline: 2px solid var(--e-tomate); outline-offset: -4px; }
+
+/* ---------- Boutons : principal (plein), secondaire (contour), discret (texte), suppression ---------- */
+
+.e-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: max(56px, 3.5rem); /* commandes de cuisine : grandes, même les mains pleines de farine */
+  padding: 8px 1.25rem; /* marge verticale : un libellé sur deux lignes ne touche pas les bords */
+  border: 0;
+  border-radius: var(--e-r-pilule);
+  background: transparent;
+  color: inherit;
+  font: 650 1.0625rem/1.2 var(--e-police);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s, background-color 0.12s;
+}
+.e-btn:active { transform: scale(0.97); }
+.e-btn:disabled { opacity: 0.45; }
+.e-btn:focus-visible { outline: 2px solid var(--e-tomate); outline-offset: 2px; }
+.e-btn > .e-icone { width: 1.125em; height: 1.125em; }
+/* Principal : une seule action par écran ou par fenêtre */
+.e-btn--principal { background: var(--e-tomate); color: var(--e-sur-tomate); box-shadow: 0 6px 18px var(--e-tomate-ombre); }
+.e-btn--principal:active { background: var(--e-tomate-presse); }
+.e-btn--secondaire { color: var(--e-tomate); box-shadow: inset 0 0 0 1.5px currentColor; }
+.e-btn--secondaire:active { background: var(--e-tomate-doux); }
+/* Discret : texte tomate sans cadre (actions rares ou d'annulation), cible de 44 px au moins */
+.e-btn--discret { min-height: max(44px, 2.75rem); color: var(--e-tomate); }
+.e-btn--discret:active { background: var(--e-tomate-doux); }
+/* Suppression : fond rouge pâle sans contour, pour ne pas ressembler au contour tomate des
+   boutons secondaires (le rouge tomate et le rouge d'erreur sont proches) ; plein dans la
+   fenêtre de confirmation. Texte 5,2:1 en clair, 6,7:1 en sombre. */
+.e-btn--danger { background: var(--e-erreur-fond); color: var(--e-erreur); }
+.e-btn--danger:active { background: var(--e-erreur-fond); filter: brightness(0.95); }
+#feuille .e-btn--danger[data-reponse] { background: var(--e-erreur-plein); color: #fff; box-shadow: none; }
+/* Tailles */
+.e-btn--large { width: 100%; }
+.e-btn--petit { min-height: max(44px, 2.75rem); padding: 6px 14px; font-size: 0.9375rem; }
+.e-btn--discret.e-btn--petit { padding: 6px 10px; }
+
+/* Boutons l'un sous l'autre */
+.e-pile { display: grid; gap: 10px; }
+/* Deux boutons côte à côte s'ils tiennent, l'un sous l'autre sinon (texte agrandi) */
+.e-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.e-actions .e-btn { flex: 1 1 9rem; padding-inline: 1rem; }
+
+/* ---------- Bloc : carte blanche, titre de section en petites capitales ---------- */
+
+.e-bloc {
+  container-type: inline-size; /* le contenu se réorganise quand le texte grandit */
+  margin: 0 0 14px;
+  padding: 1.125rem 1.25rem;
+  border-radius: var(--e-r-carte);
+  background: var(--e-surface);
+  box-shadow: var(--e-ombre);
+  color: var(--e-texte);
+}
+.e-bloc > .e-titre-section { display: flex; align-items: center; gap: var(--e-2); margin-bottom: var(--e-3); }
+.e-bloc > .e-titre-section .e-icone { width: 1.125rem; height: 1.125rem; }
+.e-titre-ok { color: var(--e-basilic-texte); }
+
+/* ---------- Aide, message : icône + texte, jamais la couleur seule ---------- */
+
+.e-aide { margin: 6px 0 0; color: var(--e-texte-2); font: 400 0.875rem/1.45 var(--e-police); }
+.e-aide--alerte { display: flex; align-items: flex-start; gap: 6px; color: var(--e-alerte-texte); font-weight: 650; }
+.e-aide--alerte .e-icone { width: 1.1em; height: 1.1em; margin-top: 0.12em; }
+.e-aide a { color: inherit; }
+
+.e-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  margin: var(--e-3) 0 0;
+  padding: 12px 14px;
+  border-radius: var(--e-r-champ);
+  font: 600 0.9375rem/1.4 var(--e-police);
+}
+.e-message:first-child { margin-top: 0; }
+.e-message .e-icone { margin-top: 0.05em; }
+.e-message--alerte { background: var(--e-alerte-fond); color: var(--e-alerte-texte); }
+.e-message--erreur { background: var(--e-erreur-fond); color: var(--e-erreur); }
+.e-message--info { background: var(--e-info-doux); color: var(--e-info); }
+
+/* ---------- Bannière (nouvelle version) ---------- */
+
+.e-banniere {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2) var(--e-3);
+  padding: var(--e-3) 14px;
+  border-radius: var(--e-r-champ);
+  font: 400 0.9375rem/1.35 var(--e-police);
+}
+.e-banniere > span { flex: 1 1 11rem; min-width: 0; }
+.e-banniere--info { background: var(--e-info-doux); color: var(--e-info); }
+.e-banniere--info .e-btn--secondaire { color: var(--e-info); }
+
+/* ---------- États vides (aucune recette, carnet vide) ---------- */
+
+.e-vide { display: grid; justify-items: center; gap: var(--e-2); padding: var(--e-6) var(--e-1); text-align: center; }
+.e-vide > .e-icone { width: 2.5rem; height: 2.5rem; margin-bottom: var(--e-1); color: var(--e-texte-2); }
+.e-vide-titre { margin: 0; color: var(--e-texte); font: 700 1.1875rem/1.3 var(--e-police); overflow-wrap: anywhere; }
+.e-vide-texte { max-width: 22rem; margin: 0; color: var(--e-texte-2); font: 400 0.9375rem/1.45 var(--e-police); }
+.e-vide .e-pile { width: 100%; margin-top: var(--e-3); }
+
+/* ---------- Lignes d'action à la manière d'iOS : icône, libellé tomate, explication ---------- */
+
+.e-menu { display: grid; }
+.e-menu-action {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  width: 100%;
+  min-height: max(52px, 3.25rem);
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  color: var(--e-texte);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.e-menu-action + .e-menu-action { border-top: 1px solid var(--e-bordure); }
+.e-menu-action > .e-icone:first-child { width: min(1.5rem, 32px); height: min(1.5rem, 32px); color: var(--e-tomate); }
+.e-menu-action > .e-icone:last-child { margin-left: auto; color: var(--e-texte-3); }
+.e-menu-action > span { display: grid; gap: 2px; min-width: 0; }
+.e-menu-action b { color: var(--e-tomate); font: 650 1rem/1.3 var(--e-police); }
+.e-menu-action small { color: var(--e-texte-2); font: 400 0.8125rem/1.35 var(--e-police); }
+.e-menu-action:active { opacity: 0.6; }
+.e-menu-action:focus-visible { outline: 2px solid var(--e-tomate); outline-offset: 2px; border-radius: 8px; }
+/* Lignes d'action séparées du texte qui les précède */
+.e-menu--separe { margin-top: var(--e-3); border-top: 1px solid var(--e-bordure); }
+
+/* ---------- Sélecteur en pilule (thème, recette du même nom) ---------- */
+
+.e-segments {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--e-r-pilule);
+  background: var(--e-surface-2);
+}
+.e-segments label { position: relative; min-width: 0; }
+.e-segments input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; }
+.e-segments span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: max(44px, 2.75rem);
+  padding: 4px 10px;
+  border-radius: var(--e-r-pilule);
+  color: var(--e-texte-2);
+  font: 650 0.9375rem/1.2 var(--e-police);
+  text-align: center;
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.e-segments input:checked + span { background: var(--e-segment-actif); color: var(--e-segment-texte); box-shadow: 0 1px 2px rgb(70 45 20 / 0.08), 0 4px 12px rgb(70 45 20 / 0.08); }
+.e-segments input:focus-visible + span { outline: 2px solid var(--e-tomate); outline-offset: 1px; }
+/* Texte très agrandi : les choix l'un sous l'autre plutôt que coupés (mesuré sur le bloc) */
+@container (max-width: 14rem) {
+  .e-segments { grid-auto-flow: row; border-radius: var(--e-r-champ); }
+}
+
+/* ---------- Champs : remplis, sans bordure, comme sur iOS ----------
+   Sous :where() (spécificité nulle) : les champs particuliers (compteur, champs géants)
+   les remplacent sans surenchère. 16 px au moins : sinon l'iPhone zoome à la saisie. */
+
+.e-champ { display: block; min-width: 0; margin-bottom: var(--e-4); }
+.e-libelle { display: block; margin-bottom: 6px; color: var(--e-texte); font: 650 0.875rem/1.3 var(--e-police); }
+:where(input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]), select, textarea) {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: max(48px, 2.875rem);
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 14px;
+  background-color: var(--e-surface-2);
+  color: var(--e-texte);
+  font: 400 max(16px, 1rem)/1.3 var(--e-police);
+}
+:where(textarea) { min-height: 6.5rem; resize: vertical; line-height: 1.45; }
+:where(select) {
+  padding-right: 42px;
+  background-image: var(--e-fleche);
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+}
+:where(input, select, textarea):focus-visible { outline: 2px solid var(--e-tomate); outline-offset: 1px; background-color: var(--e-surface); }
+:where(input, textarea)::placeholder { color: var(--e-texte-2); opacity: 1; } /* 4,7:1 sur le fond des champs */
+:where(input, select, textarea)[aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px var(--e-erreur); }
+
+/* Erreur : icône d'alerte + texte, jamais la couleur seule */
+.e-erreur { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; color: var(--e-erreur); font: 650 0.875rem/1.35 var(--e-police); }
+.e-erreur::before {
+  content: "";
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  margin-top: 0.1em;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 4.6 2.9 17.4a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9.5v4M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 4.6 2.9 17.4a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9.5v4M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Champ suivi de son unité (« g », « % », « °C ») : même largeur d'unité partout, champs alignés */
+.e-champ-unite { display: flex; align-items: center; gap: var(--e-2); }
+.e-champ-unite input { flex: 1 1 auto; }
+.e-unite { flex: none; width: 1.7em; color: var(--e-texte-2); font: 600 1rem/1.2 var(--e-police); }
+.e-deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--e-3); }
+
+/* ---------- Formulaire : sections en blocs, titre à l'intérieur ---------- */
+
+.e-formulaire { container-type: inline-size; display: grid; gap: 14px; }
+.e-formulaire fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 1.125rem 1.25rem 2px;
+  border: 0;
+  border-radius: var(--e-r-carte);
+  background: var(--e-surface);
+  box-shadow: var(--e-ombre);
+}
+/* Titre de section à l'intérieur du bloc (et non sur sa bordure) */
+.e-formulaire legend { float: left; width: 100%; margin: 0 0 var(--e-3); padding: 0; color: var(--e-texte-2); font: 650 0.8125rem/1.3 var(--e-police); letter-spacing: 0.05em; text-transform: uppercase; }
+.e-formulaire legend + * { clear: both; }
+.e-formulaire fieldset > .e-aide { margin: -6px 0 var(--e-4); }
+.e-formulaire > .e-message { margin: 0; }
+/* Texte agrandi : une colonne au lieu de deux */
+@container (max-width: 20rem) {
+  .e-formulaire .e-deux-colonnes { grid-template-columns: 1fr; }
+}
+
+/* ---------- Fenêtres (feuilles qui montent du bas de l'écran) ---------- */
+
+#feuille {
+  width: 100%;
+  max-width: 640px;
+  max-height: 92dvh;
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: 28px 28px 0 0;
+  background: var(--e-surface);
+  color: var(--e-texte);
+  box-shadow: 0 -10px 40px rgb(0 0 0 / 0.18);
+  font-size: 1rem;
+}
+#feuille::backdrop { background: rgb(30 20 10 / 0.45); }
+#feuille[open] { animation: monter 0.22s ease-out; }
+@keyframes monter { from { transform: translateY(100%); } }
+#feuille .feuille-contenu { container-type: inline-size; padding: var(--e-3) 20px calc(var(--e-4) + env(safe-area-inset-bottom)); }
+/* Petite barre en haut, comme les fenêtres d'iOS (on ferme avec « Annuler » ou en touchant le fond) */
+#feuille .feuille-contenu::before { content: ""; display: block; width: 36px; height: 5px; margin: 0 auto var(--e-4); border-radius: 3px; background: var(--e-bordure); }
+#feuille h2 { margin: 0 0 var(--e-4); color: var(--e-texte); font: 750 min(1.3125rem, 34px)/1.25 var(--e-police); letter-spacing: -0.01em; outline: none; overflow-wrap: anywhere; }
+#feuille .feuille-contenu > p { margin: 0 0 var(--e-2); color: var(--e-texte-2); font: 400 0.9375rem/1.45 var(--e-police); }
+#feuille .e-menu { margin: -6px 0 var(--e-3); }
+.boutons-feuille { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-2); margin: var(--e-3) 0; }
+/* Très grand texte : boutons l'un sous l'autre plutôt que coupés */
+@container (max-width: 20rem) {
+  #feuille .boutons-feuille { grid-template-columns: 1fr; }
+}
+
+/* ---------- Moins d'animations si l'iPhone le demande ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .e-btn:active,
+  .e-note-edition button:active { transform: none; }
+}

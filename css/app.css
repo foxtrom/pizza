@@ -1,114 +1,7 @@
-/* Pizzeria Ensen — feuille de style unique. Le style est décrit dans DESIGN.md.
-   Couleurs en variables : thème clair par défaut, sombre selon l'iPhone
-   (ou forcé par data-theme="sombre" / "clair" sur <html>). */
-
-:root {
-  color-scheme: light dark;
-  --fond: #f4efe8;
-  --fond-translucide: rgb(244 239 232 / 0.88);
-  --surface: #ffffff;
-  --surface-translucide: rgb(255 255 255 / 0.84);
-  --surface-2: #ebe4da;
-  --texte: #1d1a17;
-  --texte-doux: #877d72;
-  --bordure: #e8e1d7;
-  --accent: #c2391f;
-  --accent-texte: #ffffff;
-  --accent-doux: #fbe4dc;
-  --accent-ombre: rgb(194 57 31 / 0.28);
-  --farine: #f7ecd8;
-  --farine-fonce: #ecdcbf;
-  --paton: #fffaf1;
-  --paton-ombre: #dcc8a4;
-  --basilic: #3d7a37;
-  --basilic-doux: #e2efda;
-  --tomate-teinte: #f8dcd2;
-  --creme-teinte: #f6eedf;
-  --danger: #b3261e;
-  --danger-fond: #b3261e;
-  --alerte: #9c5600;
-  --alerte-doux: #fbe9cc;
-  --ok: var(--basilic);
-  --ok-doux: var(--basilic-doux);
-  --info: #2f6787;
-  --info-doux: #dfecf3;
-  --ombre-douce: 0 1px 2px rgb(70 45 20 / 0.04), 0 8px 24px rgb(70 45 20 / 0.06);
-  --ombre-flottante: 0 10px 30px rgb(50 30 10 / 0.12), 0 2px 6px rgb(50 30 10 / 0.05);
-  --ombre: var(--ombre-douce);
-  --rayon: 26px;
-  --rayon-champ: 18px;
-  --marge: 20px;
-  --police: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --police-code: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --decalage-message: 20px;
-}
-
-:root[data-theme="clair"] { color-scheme: light; }
-
-:root[data-theme="sombre"] {
-  color-scheme: dark;
-  --fond: #141210;
-  --fond-translucide: rgb(20 18 16 / 0.86);
-  --surface: #1f1c19;
-  --surface-translucide: rgb(38 34 30 / 0.84);
-  --surface-2: #2c2824;
-  --texte: #f3eee7;
-  --texte-doux: #a39a8f;
-  --bordure: #34302b;
-  --accent: #ff7a5c;
-  --accent-texte: #1f0d07;
-  --accent-doux: #3d221b;
-  --accent-ombre: rgb(0 0 0 / 0.35);
-  --farine: #2b251d;
-  --farine-fonce: #3a3126;
-  --paton: #efe3cc;
-  --paton-ombre: #b9a27c;
-  --basilic: #8fcf86;
-  --basilic-doux: #1f2e1d;
-  --tomate-teinte: #3a201a;
-  --creme-teinte: #2d281f;
-  --danger: #ff8e85;
-  --danger-fond: #c4362c;
-  --alerte: #f3b25c;
-  --alerte-doux: #3b2a12;
-  --info: #8cc4e3;
-  --info-doux: #16293a;
-  --ombre-douce: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.25);
-  --ombre-flottante: 0 10px 30px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="clair"]) {
-    --fond: #141210;
-    --fond-translucide: rgb(20 18 16 / 0.86);
-    --surface: #1f1c19;
-    --surface-translucide: rgb(38 34 30 / 0.84);
-    --surface-2: #2c2824;
-    --texte: #f3eee7;
-    --texte-doux: #a39a8f;
-    --bordure: #34302b;
-    --accent: #ff7a5c;
-    --accent-texte: #1f0d07;
-    --accent-doux: #3d221b;
-    --accent-ombre: rgb(0 0 0 / 0.35);
-    --farine: #2b251d;
-    --farine-fonce: #3a3126;
-    --paton: #efe3cc;
-    --paton-ombre: #b9a27c;
-    --basilic: #8fcf86;
-    --basilic-doux: #1f2e1d;
-    --tomate-teinte: #3a201a;
-    --creme-teinte: #2d281f;
-    --danger: #ff8e85;
-    --danger-fond: #c4362c;
-    --alerte: #f3b25c;
-    --alerte-doux: #3b2a12;
-    --info: #8cc4e3;
-    --info-doux: #16293a;
-    --ombre-douce: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.25);
-    --ombre-flottante: 0 10px 30px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
-  }
-}
+/* Pizzeria Ensen — mise en page et composants propres à l'appli. Le style est décrit dans DESIGN.md.
+   Couleurs, ombres, rayons et polices : jetons --e-… de css/systeme.css (chargé avant), en clair
+   et en sombre. Tailles du contenu en rem (taille du texte de l'iPhone) ; barre de titre, barre
+   d'onglets et bouton « + » en px, comme sur iOS. */
 
 /* ---------- Base ---------- */
 
@@ -119,16 +12,16 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  background: var(--fond);
+  background: var(--e-fond);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--fond);
-  color: var(--texte);
-  font: 17px/1.45 var(--police);
+  background: var(--e-fond);
+  color: var(--e-texte);
+  font: 400 1rem/1.45 var(--e-police);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -140,7 +33,7 @@ body::before {
   position: fixed;
   inset: 0 0 auto;
   height: calc(env(safe-area-inset-top) + 10px);
-  background: linear-gradient(var(--fond) calc(100% - 10px), transparent);
+  background: linear-gradient(var(--e-fond) calc(100% - 10px), transparent);
   pointer-events: none;
   z-index: 30;
 }
@@ -151,31 +44,29 @@ body.avec-onglets::after {
   position: fixed;
   inset: auto 0 0;
   height: calc(96px + env(safe-area-inset-bottom));
-  background: linear-gradient(transparent, var(--fond) 55%);
+  background: linear-gradient(transparent, var(--e-fond) 55%);
   pointer-events: none;
   z-index: 19;
 }
 
 #app { max-width: 640px; margin: 0 auto; }
 
-main { display: block; padding: 4px var(--marge) 32px; outline: none; }
+main { display: block; padding: 4px 20px 32px; outline: none; }
 body.avec-onglets main { padding-bottom: calc(124px + env(safe-area-inset-bottom)); }
-body.avec-actions main { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+/* Au moins la hauteur réelle de la barre d'actions (--hauteur-barre, mesurée par app.js) */
+body.avec-actions main { padding-bottom: max(calc(120px + env(safe-area-inset-bottom)), calc(var(--hauteur-barre, 0px) + 20px)); }
 
 h1, h2, h3 { margin: 0; line-height: 1.2; }
 p { margin: 0 0 8px; }
-a { color: var(--accent); }
+a { color: var(--e-tomate); }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { touch-action: manipulation; cursor: pointer; }
 [hidden] { display: none !important; }
 small { font-size: 0.8em; }
 
-.icone { width: 20px; height: 20px; flex: none; }
-.aide { color: var(--texte-doux); font-size: 14px; margin: 6px 0 0; }
-.aide.alerte { color: var(--alerte); font-weight: 600; }
-.aide.alerte a { color: inherit; }
-.intro { margin: 10px 0 16px; }
+.icone { width: 20px; height: 20px; flex: none; } /* icônes des barres (px, comme sur iOS) */
 .centre { text-align: center; }
+.actions-bas { margin-top: var(--e-4); }
 
 /* Apparition d'un écran (désactivée si l'iPhone demande moins d'animations) */
 .apparait { animation: apparaitre 0.18s ease-out; }
@@ -188,21 +79,22 @@ small { font-size: 0.8em; }
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--fond-translucide);
+  background: var(--e-fond-translucide);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
 
-/* Grand titre façon iOS (écrans des onglets) */
+/* Grand titre façon iOS (écrans des onglets) : il suit la taille du texte, comme sur iOS */
 .entete-grand {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 20px var(--marge) 10px;
+  padding: 20px 20px 10px;
 }
-.entete-grand h1 { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
-.entete-grand .sous-titre { margin: 6px 0 0; color: var(--texte-doux); font-size: 15px; }
+.entete-grand > div:first-child { min-width: 0; }
+.entete-grand h1 { color: var(--e-texte); font: 800 min(2rem, 48px)/1.1 var(--e-police); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.entete-grand .sous-titre { margin: 6px 0 0; color: var(--e-texte-2); font: 400 0.875rem/1.35 var(--e-police); }
 .actions-rondes { display: flex; gap: 10px; flex: none; }
 
 /* Bouton rond flottant */
@@ -214,14 +106,16 @@ small { font-size: 0.8em; }
   height: 52px;
   border: 0;
   border-radius: 50%;
-  background: var(--surface);
-  color: var(--texte);
-  box-shadow: var(--ombre-douce);
+  background: var(--e-surface);
+  color: var(--e-texte);
+  box-shadow: var(--e-ombre);
   text-decoration: none;
   transition: transform 0.12s;
 }
 .bouton-rond:active { transform: scale(0.94); }
-.bouton-rond .icone { width: 19px; height: 19px; stroke-width: 1.75; }
+.bouton-rond .icone { width: 19px; height: 19px; }
+.bouton-rond-petit { width: 44px; height: 44px; margin-right: 6px; }
+.bouton-rond-petit .icone { width: 18px; height: 18px; }
 
 /* Barre compacte des écrans secondaires (fiche, formulaire) */
 .barre-titre {
@@ -249,7 +143,7 @@ small { font-size: 0.8em; }
   gap: 2px;
   min-height: 44px;
   padding: 8px 10px;
-  color: var(--accent);
+  color: var(--e-tomate);
   text-decoration: none;
   font-size: 17px;
   font-weight: 500;
@@ -268,84 +162,21 @@ small { font-size: 0.8em; }
   border: 0;
   border-radius: 14px;
   background: none;
-  color: var(--accent);
+  color: var(--e-tomate);
   font-size: 11px;
   font-weight: 700;
 }
-.action-entete .icone { stroke-width: 1.75; }
-.action-entete:disabled { color: var(--texte-doux); opacity: 0.5; }
-.action-entete:not(:disabled):active { background: var(--surface-2); }
+.action-entete:disabled { color: var(--e-texte-2); opacity: 0.55; }
+.action-entete:not(:disabled):active { background: var(--e-surface-2); }
 
-/* ---------- Bannières ---------- */
+.lien-entete:focus-visible,
+.action-entete:focus-visible,
+.bouton-rond:focus-visible,
+#bouton-plus:focus-visible,
+#onglets a:focus-visible { outline: 2px solid var(--e-tomate); outline-offset: 2px; }
 
-.banniere {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 13px 16px;
-  margin: 12px 0 0;
-  border-radius: 18px;
-  font-size: 15px;
-}
-.banniere .icone { width: 20px; height: 20px; margin-top: 1px; }
-.banniere-alerte { background: var(--alerte-doux); color: var(--alerte); }
-.banniere-info { margin: 0 0 16px; background: var(--info-doux); color: var(--info); }
-.banniere-maj {
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 12px 16px 0;
-  background: var(--info-doux);
-  color: var(--info);
-}
-.banniere-maj > span { flex: 1 1 200px; }
-
-/* ---------- Boutons ---------- */
-
-.btn {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 52px;
-  padding: 12px 20px;
-  border: 0;
-  border-radius: var(--rayon-champ);
-  background: var(--surface);
-  color: var(--texte);
-  box-shadow: var(--ombre-douce);
-  font-weight: 650;
-  text-decoration: none;
-  text-align: center;
-  line-height: 1.2;
-  transition: transform 0.12s;
-}
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.45; }
-.btn-primaire { background: var(--accent); color: var(--accent-texte); box-shadow: 0 6px 18px var(--accent-ombre); }
-.btn-danger { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--danger); }
-.feuille-contenu .btn-danger[data-reponse] { background: var(--danger-fond); color: #fff; box-shadow: none; }
-.btn-discret { background: transparent; box-shadow: none; color: var(--texte-doux); }
-.btn-large { width: 100%; }
-.btn-geant { min-height: 60px; border-radius: 999px; font-size: 18px; }
-
-.btn-petit {
-  appearance: none;
-  min-height: 40px;
-  padding: 8px 14px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  background: transparent;
-  color: inherit;
-  font-size: 15px;
-  font-weight: 650;
-}
-
-.pile-boutons { display: grid; gap: 10px; }
-.bloc .pile-boutons { margin-top: 14px; }
-.deux-boutons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.boutons-feuille { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 12px; }
-.actions-bas { margin-top: 16px; }
+/* Nouvelle version disponible (au-dessus de l'écran) */
+.banniere-maj { margin: 12px 20px 0; }
 
 /* ---------- Barre d'onglets flottante, bouton « + », barre d'actions ---------- */
 
@@ -360,10 +191,10 @@ small { font-size: 0.8em; }
   gap: 2px;
   padding: 6px;
   border-radius: 34px;
-  background: var(--surface-translucide);
+  background: var(--e-surface-translucide);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   backdrop-filter: blur(18px) saturate(1.4);
-  box-shadow: var(--ombre-flottante);
+  box-shadow: var(--e-ombre-flottante);
 }
 #onglets a {
   display: flex;
@@ -373,14 +204,13 @@ small { font-size: 0.8em; }
   gap: 2px;
   min-height: 48px;
   border-radius: 26px;
-  color: var(--texte);
+  color: var(--e-texte);
   text-decoration: none;
   font-size: 11px;
   font-weight: 600;
-  transition: background 0.15s, color 0.15s;
+  transition: background-color 0.15s, color 0.15s;
 }
-#onglets a .icone { width: 20px; height: 20px; }
-#onglets a.actif { background: var(--surface-2); color: var(--accent); }
+#onglets a.actif { background: var(--e-surface-2); color: var(--e-tomate); } /* 4,7:1 */
 
 #bouton-plus {
   appearance: none;
@@ -395,11 +225,11 @@ small { font-size: 0.8em; }
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--surface-translucide);
+  background: var(--e-surface-translucide);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   backdrop-filter: blur(18px) saturate(1.4);
-  color: var(--accent);
-  box-shadow: var(--ombre-flottante);
+  color: var(--e-tomate);
+  box-shadow: var(--e-ombre-flottante);
   transition: transform 0.12s;
 }
 #bouton-plus:active { transform: scale(0.94); }
@@ -412,69 +242,71 @@ small { font-size: 0.8em; }
   bottom: 0;
   z-index: 20;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   max-width: 640px;
   margin: 0 auto;
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: var(--fond-translucide);
+  background: var(--e-fond-translucide);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
 #barre-actions:empty { display: none; }
-#barre-actions .btn { flex: 1 1 0; }
-#barre-actions .btn-principal { flex-grow: 1.6; }
+/* Côte à côte s'ils tiennent, l'un sous l'autre sinon (texte agrandi) */
+#barre-actions .e-btn { flex: 1 1 8rem; padding-inline: 1rem; }
+#barre-actions .e-btn--principal { flex-grow: 1.6; }
+/* Boutons empilés (classe posée par js/app.js) : barre resserrée */
+#barre-actions.empilee { row-gap: 6px; padding-top: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+#barre-actions.empilee .e-btn { min-height: 48px; padding-block: 5px; }
 
-/* ---------- Cartes en deux parties ---------- */
+/* ---------- Titres de section des écrans ---------- */
 
-.titre-section {
-  margin: 26px 0 10px;
-  color: var(--texte-doux);
-  font-size: 13px;
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-main > .titre-section:first-child { margin-top: 8px; }
+main > .e-titre-section { margin: 1.625rem 0 0.625rem; }
+main > .e-titre-section:first-child { margin-top: 0.5rem; }
+
+/* ---------- Cartes en deux parties : en-tête farine, pied blanc ---------- */
 
 .carte {
+  container-type: inline-size; /* l'illustration passe sous le texte quand il grandit */
   display: block;
   overflow: hidden;
-  border-radius: var(--rayon);
-  background: var(--surface);
-  box-shadow: var(--ombre-douce);
+  border-radius: var(--e-r-carte);
+  background: var(--e-surface);
+  box-shadow: var(--e-ombre);
   color: inherit;
   text-decoration: none;
 }
 .carte-tete {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   padding: 16px 16px 14px 20px;
-  background: var(--farine);
+  background: var(--e-farine);
 }
-.carte-texte { flex: 1; min-width: 0; display: grid; gap: 3px; }
-.carte-nom { font-size: 19px; font-weight: 700; line-height: 1.25; }
-.carte-sous { color: var(--texte-doux); font-size: 14px; }
-.carte-sous b { color: var(--texte); }
+.carte-texte { flex: 1 1 11rem; min-width: 0; display: grid; gap: 3px; }
+.carte-nom { color: var(--e-texte); font: 700 1.125rem/1.25 var(--e-police); overflow-wrap: anywhere; }
+.carte-sous { color: var(--e-texte-2); font: 400 0.875rem/1.35 var(--e-police); }
+.carte-sous b { color: var(--e-texte); font-weight: 650; }
+.carte-texte .e-badges { margin-top: 4px; }
 .carte-pied {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
+  display: grid;
+  gap: 6px;
   padding: 13px 20px 15px;
-  color: var(--texte-doux);
-  font-size: 14px;
+  color: var(--e-texte-2);
+  font: 400 0.875rem/1.45 var(--e-police);
 }
-.chiffre b { color: var(--texte); font-size: 16px; font-weight: 700; }
-.point { opacity: 0.6; }
+.chiffre b { color: var(--e-texte); font: 700 1rem/1.3 var(--e-police-arrondie); font-variant-numeric: tabular-nums; }
+.carte-pied .e-note { font-size: 1rem; }
+.carte-note { color: var(--e-texte-2); font-style: italic; overflow-wrap: anywhere; }
 
 /* Carte qu'on choisit (recette de la fournée) : liseré tomate et coche ronde */
 .choix-recettes { display: grid; gap: 14px; }
 .carte-choix { position: relative; cursor: pointer; transition: box-shadow 0.15s, transform 0.12s; }
-.carte-choix input { position: absolute; inset: 0; margin: 0; opacity: 0; }
+.carte-choix input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 .carte-choix:active { transform: scale(0.985); }
-.carte-choix:has(input:checked) { box-shadow: 0 0 0 2.5px var(--accent), var(--ombre-douce); }
-.carte-choix:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+.carte-choix:has(input:checked) { box-shadow: 0 0 0 2.5px var(--e-tomate), var(--e-ombre); }
+.carte-choix:has(input:focus-visible) { outline: 2px solid var(--e-tomate); outline-offset: 4px; }
 .carte-illus { position: relative; flex: none; }
 .coche-ronde {
   position: absolute;
@@ -485,9 +317,9 @@ main > .titre-section:first-child { margin-top: 8px; }
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-texte);
-  box-shadow: 0 0 0 3px var(--farine);
+  background: var(--e-tomate);
+  color: var(--e-sur-tomate);
+  box-shadow: 0 0 0 3px var(--e-farine);
   opacity: 0;
   transform: scale(0.6);
   transition: opacity 0.15s, transform 0.15s;
@@ -495,463 +327,305 @@ main > .titre-section:first-child { margin-top: 8px; }
 .coche-ronde .icone { width: 14px; height: 14px; }
 .carte-choix:has(input:checked) .coche-ronde { opacity: 1; transform: none; }
 
-/* Illustrations rondes (voir ILLUSTRATIONS dans js/ui.js) */
-.illus { display: block; width: 64px; height: 64px; }
-.illus-disque { fill: var(--farine-fonce); }
-.illus-ombre { fill: rgb(80 50 20 / 0.14); }
-.paton { fill: var(--paton); }
-.paton-dessous { fill: var(--paton-ombre); opacity: 0.55; }
-.paton-reflet { fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; opacity: 0.85; }
-.farine-point { fill: var(--paton-ombre); }
-
-/* ---------- Fournée ---------- */
-
-.compteur-boules {
-  display: grid;
-  grid-template-columns: 64px 1fr 64px;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-radius: var(--rayon);
-  background: var(--surface);
-  box-shadow: var(--ombre-douce);
-}
-.btn-compteur {
-  appearance: none;
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--surface-2);
-  color: var(--accent);
-  transition: transform 0.12s;
-}
-.btn-compteur:active { transform: scale(0.92); }
-.btn-compteur .icone { width: 22px; height: 22px; }
-#boules {
-  box-shadow: none;
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  min-height: 64px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--texte);
-  text-align: center;
-  font-size: 46px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-#boules:focus-visible { outline: none; box-shadow: none; }
-
-/* Température de la pièce et levure, côte à côte */
-.variables-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.champ-carte {
-  display: grid;
-  gap: 2px;
-  padding: 14px 14px 8px;
-  border-radius: var(--rayon);
-  background: var(--surface);
-  box-shadow: var(--ombre-douce);
-  transition: box-shadow 0.15s;
-}
-.champ-carte:focus-within { box-shadow: 0 0 0 2px var(--accent), var(--ombre-douce); }
-.champ-carte:has([aria-invalid="true"]) { box-shadow: 0 0 0 2px var(--danger), var(--ombre-douce); }
-.libelle-carte { color: var(--texte-doux); font-size: 13px; font-weight: 650; letter-spacing: 0.05em; text-transform: uppercase; }
-.champ-carte .valeur { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
-.variables-duo .champ-carte input[type] {
-  box-shadow: none;
-  -webkit-appearance: none;
-  appearance: none;
-  width: 4.4ch;
-  min-height: 54px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--texte);
-  text-align: right;
-  font-size: 36px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-.variables-duo .champ-carte input[type]:focus-visible { outline: none; box-shadow: none; }
-.champ-carte input::placeholder { color: var(--bordure); }
-.champ-carte .unite { flex: none; color: var(--texte-doux); font-size: 20px; font-weight: 700; }
-#aide-temp:not(:empty), #aide-levure:not(:empty) { margin-top: 10px; }
-#aide-temp .aide, #aide-levure .aide, #aide-temp .erreur, #aide-levure .erreur { margin: 0 4px; }
-.lien {
-  appearance: none;
-  min-height: 44px;
-  margin: 2px 4px 0;
-  padding: 8px 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font-size: 15px;
-  font-weight: 650;
-  text-align: left;
-}
-
-/* Doses : en-tête farine, une ligne par ingrédient */
-#doses-fournee { margin-top: 26px; }
-#doses-fournee + .btn-primaire { margin-top: 18px; }
-.carte-doses { margin-bottom: 14px; }
-.carte-doses .carte-tete { padding: 14px 20px; }
-.carte-doses .carte-nom { font-size: 17px; }
-.doses.carte-pied { display: block; margin: 0; padding: 4px 20px 10px; color: var(--texte); font-size: 17px; list-style: none; }
-.dose {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 66px;
-}
-.dose + .dose { border-top: 1px solid var(--bordure); }
-.dose-nom { display: grid; font-size: 18px; font-weight: 650; line-height: 1.25; }
-.dose-nom small { color: var(--texte-doux); font-size: 13px; font-weight: 500; }
-.dose-valeur {
-  white-space: nowrap;
-  font-size: 34px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-.dose-manquante .dose-valeur { color: var(--texte-doux); }
-.dose-manquante .dose-nom small { color: var(--alerte); font-weight: 650; }
-
-/* Eau en deux versements, sous la ligne de l'eau */
-.versement {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin: -6px 0 10px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  font-size: 16px;
-  font-variant-numeric: tabular-nums;
-}
-.versement strong { font-size: 20px; }
-.versement + .versement { margin-top: -4px; }
-.doses .versement + .dose { border-top: 1px solid var(--bordure); }
-
-/* Rappel du carnet sur l'écran Fournée */
-.rappels { display: grid; gap: 10px; margin-top: 14px; }
-.rappel {
-  display: grid;
-  gap: 2px;
-  padding: 12px 16px;
-  border-radius: 20px;
-  background: var(--basilic-doux);
-  color: var(--basilic);
-  font-size: 15px;
-  text-decoration: none;
-}
-.rappel-titre { font-size: 13px; font-weight: 700; }
-.rappel-attente { background: var(--alerte-doux); color: var(--alerte); font-weight: 600; }
-.resultat-court { color: var(--texte); }
-
-/* Note et constats d'une fournée du carnet */
-.etoiles { display: flex; gap: 4px; margin-bottom: 14px; }
-.etoiles button {
-  appearance: none;
-  min-width: 52px;
-  min-height: 52px;
-  border: 0;
-  background: none;
-  color: var(--bordure);
-  font-size: 38px;
-  line-height: 1;
-  transition: transform 0.12s, color 0.15s;
-}
-.etoiles button:active { transform: scale(0.9); }
-.etoiles button.pleine { color: var(--accent); }
-
-.constats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.constat { position: relative; }
-.constat input { position: absolute; inset: 0; margin: 0; opacity: 0; }
-.constat span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  font-size: 15px;
-  font-weight: 600;
-  transition: background 0.15s, color 0.15s;
-}
-.constat input:checked + span { background: var(--accent-doux); color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
-.constat input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-.vide { padding: 28px 4px; text-align: center; color: var(--texte-doux); }
-.vide .pile-boutons { margin-top: 18px; }
-
-/* ---------- Listes (recettes, carnet) ---------- */
-
-.liste-cartes { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.liste-cartes { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
 main > .liste-cartes:first-child { margin-top: 8px; }
 .carte-lien { transition: transform 0.12s; }
 .carte-lien:active { transform: scale(0.985); }
-.pastilles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.pastilles:empty { display: none; }
-.pastille {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--texte-doux);
-  font-size: 12px;
-  font-weight: 650;
-}
-.pastille-accent { background: var(--accent); color: var(--accent-texte); }
-.pastille-alerte { background: var(--alerte-doux); color: var(--alerte); }
-.pastille-basilic { background: var(--basilic-doux); color: var(--basilic); }
-.etoiles-texte { color: var(--accent); font-size: 15px; letter-spacing: 1px; }
-.carte-note { flex-basis: 100%; color: var(--texte-doux); font-size: 14px; font-style: italic; }
-.resultat-court { color: var(--texte); }
+.carte-lien:focus-visible { outline: 2px solid var(--e-tomate); outline-offset: 3px; }
+.carte-heros { margin: 8px 0 14px; }
+.carte-heros + .e-btn { margin-bottom: 20px; }
+.aide-liste { margin-top: var(--e-4); }
 
-/* Pizza dessinée (cartes du carnet) */
+/* Illustrations rondes (voir ILLUSTRATIONS dans js/ui.js) : couleurs en jetons, clair et sombre */
+.illus { display: block; width: 64px; height: 64px; }
+.illus-disque { fill: var(--e-farine-fonce); }
+.illus-ombre { fill: rgb(80 50 20 / 0.14); }
+.paton { fill: var(--e-paton); }
+.paton-dessous { fill: var(--e-paton-ombre); opacity: 0.55; }
+.paton-reflet { fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; opacity: 0.85; }
+.farine-point { fill: var(--e-paton-ombre); }
 .pizza-croute { fill: #ecc98c; }
 .pizza-cuisson { fill: #a8662e; opacity: 0.75; }
 .pizza-tomate { fill: #d4452b; }
 .pizza-mozza { fill: #fffaf0; }
 .pizza-basilic { fill: #3d7a37; }
 
-/* ---------- Blocs (fiches, récap, réglages, import) ---------- */
+/* ---------- Fournée : rappel du carnet ---------- */
 
-.carte-heros { margin: 8px 0 14px; }
-.carte-heros + .btn { margin-bottom: 20px; }
-.fiche-tete { margin: 8px 0 16px; }
-.fiche-tete .aide { margin: 0; }
-.fiche-nom { margin: 4px 0 0; font-size: 28px; font-weight: 800; letter-spacing: -0.01em; }
-.fiche-tete + .btn { margin-bottom: 14px; }
-
-.bloc {
-  margin-bottom: 14px;
-  padding: 18px 20px;
-  border-radius: var(--rayon);
-  background: var(--surface);
-  box-shadow: var(--ombre-douce);
-}
-.bloc h3 {
+.rappels { display: grid; gap: 10px; margin-top: 14px; }
+.rappel {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: var(--texte-doux);
-  font-size: 13px;
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  gap: var(--e-3);
+  min-height: 44px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 20px;
+  font: 400 0.9375rem/1.4 var(--e-police);
+  text-decoration: none;
 }
-.bloc h3 .icone { width: 18px; height: 18px; }
-.bloc-alerte { box-shadow: inset 0 0 0 2px var(--alerte), var(--ombre-douce); }
-.bloc-alerte h3 { color: var(--alerte); }
-.bloc-alerte .btn { margin-top: 10px; }
+.rappel > .e-icone:first-child { align-self: flex-start; margin-top: 0.1em; }
+.rappel > .e-icone:last-child { margin-left: auto; opacity: 0.7; }
+.rappel-texte { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.rappel-texte b { font-size: 0.8125rem; font-weight: 700; }
+.rappel--ok { background: var(--e-basilic-doux); color: var(--e-basilic-texte); }
+.rappel--ok .rappel-texte > span { color: var(--e-texte); }
+.rappel--attente { background: var(--e-alerte-fond); color: var(--e-alerte-texte); font-weight: 600; }
+.rappel:focus-visible { outline: 2px solid var(--e-tomate); outline-offset: 2px; }
 
+/* ---------- Fournée : nombre de boules ---------- */
+
+.compteur-boules {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--e-r-carte);
+  background: var(--e-surface);
+  box-shadow: var(--e-ombre);
+}
+.btn-compteur {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: max(64px, min(3.75rem, 84px));
+  height: max(64px, min(3.75rem, 84px));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--e-surface-2);
+  color: var(--e-tomate);
+  transition: transform 0.12s;
+}
+.btn-compteur:active { transform: scale(0.92); }
+.btn-compteur:focus-visible { outline: 2px solid var(--e-tomate); outline-offset: 2px; }
+.btn-compteur .icone { width: 22px; height: 22px; }
+.compteur-boules #boules {
+  width: 100%;
+  min-height: 64px;
+  padding: 0;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--e-texte);
+  text-align: center;
+  font: 800 min(2.75rem, 64px)/1 var(--e-police-arrondie);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Fournée : température de la pièce et levure, champs géants côte à côte ---------- */
+
+.variables { container-type: inline-size; }
+.variables-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* Texte agrandi : l'un sous l'autre */
+@container (max-width: 17rem) {
+  .variables-duo { grid-template-columns: 1fr; }
+}
+.champ-carte {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px 14px 8px;
+  border-radius: var(--e-r-carte);
+  background: var(--e-surface);
+  box-shadow: var(--e-ombre);
+  transition: box-shadow 0.15s;
+}
+/* Le cadre est porté par la carte (et non par le champ) : focus en tomate, erreur en rouge */
+.champ-carte:focus-within { box-shadow: 0 0 0 2px var(--e-tomate), var(--e-ombre); }
+.champ-carte:has([aria-invalid="true"]) { box-shadow: 0 0 0 2px var(--e-erreur), var(--e-ombre); }
+.libelle-carte { color: var(--e-texte-2); font: 650 0.8125rem/1.3 var(--e-police); letter-spacing: 0.05em; text-transform: uppercase; }
+.champ-carte .valeur { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+.champ-carte input {
+  width: 4.4ch;
+  min-height: 54px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  color: var(--e-texte);
+  text-align: right;
+  font: 800 min(2.125rem, 56px)/1.1 var(--e-police-arrondie);
+  font-variant-numeric: tabular-nums;
+}
+.champ-carte input:focus-visible { outline: none; background: transparent; }
+.champ-carte .e-unite { width: auto; font: 700 1.125rem/1 var(--e-police); }
+#aide-temp:not(:empty),
+#aide-levure:not(:empty) { margin: 10px 4px 0; }
+#aide-temp > :first-child,
+#aide-levure > :first-child { margin-top: 0; }
+#aide-levure .e-btn--discret { margin: 2px 0 0 -10px; text-align: left; }
+
+/* ---------- Doses : en-tête farine, une ligne par ingrédient ---------- */
+
+#doses-fournee { margin-top: 1.625rem; }
+#doses-fournee + .e-btn { margin-top: 18px; }
+.carte-doses { margin-bottom: 14px; }
+.carte-doses .carte-tete { padding: 14px 20px; }
+.carte-doses .carte-nom { font-size: 1rem; }
+.doses { display: block; margin: 0; padding: 4px 20px 10px; color: var(--e-texte); list-style: none; }
+.dose {
+  display: flex;
+  flex-wrap: wrap; /* texte agrandi : la dose passe sous le nom */
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 12px;
+  min-height: 66px;
+  padding: 6px 0;
+}
+.dose + .dose { border-top: 1px solid var(--e-bordure); }
+/* Le nom (et sa légende) se coupe d'abord ; la dose ne passe dessous que si la place manque vraiment */
+.dose-nom { flex: 1 1 8rem; display: grid; min-width: 0; font: 650 1.0625rem/1.25 var(--e-police); }
+.dose-nom small { color: var(--e-texte-2); font: 500 0.8125rem/1.35 var(--e-police); }
+.dose-valeur {
+  margin-left: auto;
+  white-space: nowrap;
+  font: 800 min(2rem, 52px)/1.15 var(--e-police-arrondie);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.dose-manquante .dose-valeur { color: var(--e-texte-2); }
+.dose-manquante .dose-nom small { display: flex; align-items: center; gap: 4px; color: var(--e-alerte-texte); font-weight: 650; }
+.dose-manquante .dose-nom small .e-icone { width: 1em; height: 1em; }
+
+/* Eau en deux versements, sous la ligne de l'eau */
+.versement {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 12px;
+  margin: -6px 0 10px;
+  padding: 7px 14px;
+  border-radius: var(--e-r-champ);
+  background: var(--e-surface-2);
+  font: 400 0.9375rem/1.4 var(--e-police);
+  font-variant-numeric: tabular-nums;
+}
+.versement strong { margin-left: auto; font: 700 1.125rem/1.3 var(--e-police-arrondie); }
+.versement + .versement { margin-top: -4px; }
+.doses .versement + .dose { border-top: 1px solid var(--e-bordure); }
+
+/* ---------- Récap et fiches ---------- */
+
+.fiche-tete { margin: 8px 0 16px; }
+.fiche-nom { margin: 4px 0 0; font: 800 min(1.625rem, 40px)/1.15 var(--e-police); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.fiche-tete + .e-message { margin: 0 0 14px; }
+
+/* Libellé à gauche, valeur à droite ; une seule colonne quand le texte grandit */
 .infos { display: grid; grid-template-columns: auto 1fr; gap: 12px 16px; margin: 0; }
-.infos dt { color: var(--texte-doux); }
+.infos dt { color: var(--e-texte-2); }
 .infos dd { margin: 0; font-weight: 650; text-align: right; }
-.infos dd small { display: block; color: var(--texte-doux); font-size: 14px; font-weight: 500; }
+.infos dd small { display: block; color: var(--e-texte-2); font: 500 0.875rem/1.4 var(--e-police); }
+@container (max-width: 18rem) {
+  .infos { grid-template-columns: 1fr; gap: 2px; }
+  .infos dd { margin-bottom: 10px; text-align: left; }
+}
 .notes { margin: 0; white-space: pre-line; }
 
 .defilement { overflow-x: auto; }
-.grille-temp,
-.tableau-controle {
+.grille-temp {
   width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
+  font: 400 0.875rem/1.3 var(--e-police);
   font-variant-numeric: tabular-nums;
 }
-.grille-temp { font-size: 14px; }
 .grille-temp th,
 .grille-temp td { padding: 10px 3px; text-align: right; white-space: nowrap; }
 .grille-temp th:first-child { text-align: left; }
-.grille-temp thead th { color: var(--texte-doux); font-size: 12px; font-weight: 650; letter-spacing: 0.03em; text-transform: uppercase; }
-.grille-temp tbody tr > * { border-top: 1px solid var(--bordure); }
-.grille-temp .calcule { color: var(--texte-doux); font-style: italic; }
+.grille-temp thead th { color: var(--e-texte-2); font: 650 0.75rem/1.3 var(--e-police); letter-spacing: 0.03em; text-transform: uppercase; }
+.grille-temp tbody tr > * { border-top: 1px solid var(--e-bordure); }
+.grille-temp .calcule { color: var(--e-texte-2); font-style: italic; }
 
-details summary { min-height: 44px; padding: 10px 0; color: var(--accent); font-weight: 600; cursor: pointer; }
+details summary { min-height: 44px; padding: 10px 0; color: var(--e-tomate); font-weight: 650; cursor: pointer; }
 .details-import summary { min-height: 0; padding: 0; }
+.details-import[open] summary { margin-bottom: 4px; }
 .texte-importe {
   margin: 12px 0 0;
   padding: 14px;
   overflow-x: auto;
   border-radius: 16px;
-  background: var(--surface-2);
-  font: 13px/1.45 var(--police-code);
+  background: var(--e-surface-2);
+  font: 0.8125rem/1.45 var(--e-police-code);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
+/* ---------- Carnet : résultat d'une fournée ---------- */
+
+/* Constats en un toucher : coche quand ils sont choisis (pas seulement la couleur) */
+.constats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--e-4); }
+.constat { position: relative; }
+.constat input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; }
+.constat span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: var(--e-r-pilule);
+  background: var(--e-surface-2);
+  font: 600 0.9375rem/1.25 var(--e-police);
+  transition: background-color 0.15s, color 0.15s;
+}
+.constat input:checked + span { padding-left: 12px; background: var(--e-tomate-doux); color: var(--e-tomate-texte); box-shadow: inset 0 0 0 1.5px var(--e-tomate); }
+.constat input:checked + span::before {
+  content: "";
+  width: 1em;
+  height: 1em;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.constat input:focus-visible + span { outline: 2px solid var(--e-tomate); outline-offset: 2px; }
+#etat-resultat > :first-child { margin-top: 0; }
+.resultat-fournee .e-champ { margin-bottom: var(--e-3); }
+
 /* ---------- Import ---------- */
 
-#texte-import { min-height: 190px; font: 16px/1.45 var(--police-code); }
-#form-import .deux-boutons { margin-top: 14px; }
-#form-import .btn-discret { margin-top: 4px; min-height: 44px; }
+#texte-import { min-height: 11rem; font: max(16px, 0.9375rem)/1.45 var(--e-police-code); }
+#form-import .e-actions { margin-top: 14px; }
+#form-import .e-btn--discret { margin-top: 4px; }
 #resultat-import { margin-top: 22px; scroll-margin-top: 64px; }
-#resultat-import > .btn { margin-top: 6px; }
-.apercu h3 { color: var(--basilic); }
+#resultat-import > .e-btn { margin-top: 6px; }
 .doublon { margin: -4px 0 14px; }
-.doublon .aide { margin: 0 0 8px; }
+.doublon .e-aide { margin: 0 0 8px; }
+.apercu .e-message { margin-bottom: 0; }
 
-.controle { margin-top: 16px; padding: 14px 16px; border-radius: 18px; }
-.controle-ok { background: var(--basilic-doux); color: var(--basilic); }
-.controle-ecart { background: var(--alerte-doux); color: var(--alerte); }
-.controle-titre { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-weight: 700; }
+/* Contrôle des doses : identiques (basilic) ou écart (alerte), avec leur icône */
+.controle { margin-top: 16px; padding: 14px 16px; border-radius: var(--e-r-champ); }
+.controle-ok { background: var(--e-basilic-doux); color: var(--e-basilic-texte); }
+.controle-ecart { background: var(--e-alerte-fond); color: var(--e-alerte-texte); }
+.controle-titre { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 8px; font-weight: 700; }
+.controle-titre .e-icone { margin-top: 0.1em; }
+.tableau-controle {
+  width: 100%;
+  border-collapse: collapse;
+  font: 400 0.9375rem/1.4 var(--e-police);
+  font-variant-numeric: tabular-nums;
+}
 .tableau-controle th,
 .tableau-controle td { padding: 3px 0; text-align: right; }
 .tableau-controle th:first-child { text-align: left; }
-.tableau-controle thead th { font-size: 12px; font-weight: 650; opacity: 0.85; }
+.tableau-controle thead th { font-size: 0.75rem; font-weight: 650; }
 
-/* ---------- Formulaires ---------- */
+/* ---------- Formulaire : une température de la grille ---------- */
 
-fieldset { margin: 0 0 8px; padding: 0; border: 0; min-width: 0; }
-legend {
-  padding: 0;
-  margin: 18px 0 10px;
-  color: var(--texte-doux);
-  font-size: 13px;
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.champ { display: block; margin-bottom: 16px; min-width: 0; }
-.libelle { display: block; margin-bottom: 6px; font-size: 15px; font-weight: 650; }
-
-input:not([type="radio"]):not([type="checkbox"]),
-select,
-textarea {
-  -webkit-appearance: none;
-  appearance: none;
-  display: block;
-  width: 100%;
-  min-width: 0;
-  min-height: 52px;
-  padding: 12px 16px;
-  border: 0;
-  border-radius: 16px;
-  background-color: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--bordure);
-  color: var(--texte);
-  font-size: 17px; /* 16 px minimum : sinon l'iPhone zoome à la saisie */
-  transition: box-shadow 0.15s;
-}
-textarea { min-height: 100px; resize: vertical; line-height: 1.4; }
-select {
-  padding-right: 42px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23877d72' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
-  background-size: 18px;
-}
-input:not([type="radio"]):not([type="checkbox"]):focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px var(--accent);
-}
-.btn:focus-visible,
-.btn-petit:focus-visible,
-.bouton-rond:focus-visible,
-#bouton-plus:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-input[aria-invalid="true"],
-select[aria-invalid="true"],
-textarea[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger) !important; }
-.erreur { display: block; margin: 6px 0 0; color: var(--danger); font-size: 14px; font-weight: 650; }
-
-.deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-.champ-unite { display: flex; align-items: center; gap: 8px; }
-.champ-unite input { flex: 1 1 auto; }
-.unite { flex: none; width: 1.7em; color: var(--texte-doux); font-weight: 600; } /* même largeur partout : champs alignés */
-
-/* Éditeur de la grille : une carte par température */
-.grille-edition { display: grid; gap: 12px; margin: 12px 0; }
+.grille-edition { display: grid; gap: 12px; margin: 0 0 12px; }
 .ligne-grille {
-  padding: 14px 16px 2px;
-  border-radius: 22px;
-  background: var(--surface);
-  box-shadow: var(--ombre-douce);
+  padding: 12px 14px 0;
+  border: 1px solid var(--e-bordure);
+  border-radius: var(--e-r-champ);
 }
-.ligne-grille input:not([type="hidden"]) { background-color: var(--fond); box-shadow: none; }
-.ligne-grille-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-.btn-petit.btn-discret { border-color: var(--bordure); color: var(--texte-doux); }
-
-/* Sélecteur en pilule */
-.segments {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 999px;
-  background: var(--surface-2);
-}
-.segments label { position: relative; }
-.segments input { position: absolute; inset: 0; opacity: 0; margin: 0; }
-.segments span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 10px;
-  border-radius: 999px;
-  color: var(--texte-doux);
-  font-weight: 650;
-  text-align: center;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-}
-.segments input:checked + span { background: var(--surface); color: var(--texte); box-shadow: 0 1px 2px rgb(70 45 20 / 0.08), 0 4px 12px rgb(70 45 20 / 0.08); }
-.segments input:focus-visible + span { outline: 2px solid var(--accent); }
-
-/* Petit bouton rond (en-tête d'une fiche) */
-.bouton-rond-petit { width: 40px; height: 40px; margin-right: 6px; }
-.bouton-rond-petit .icone { width: 18px; height: 18px; }
-
-/* ---------- Feuille (panneau du bas) ---------- */
-
-#feuille {
-  width: 100%;
-  max-width: 640px;
-  max-height: 92dvh;
-  margin: auto auto 0;
-  padding: 0;
-  border: 0;
-  border-radius: 28px 28px 0 0;
-  background: var(--fond);
-  color: var(--texte);
-  box-shadow: 0 -10px 40px rgb(0 0 0 / 0.18);
-}
-#feuille::backdrop { background: rgb(30 20 10 / 0.4); }
-#feuille[open] { animation: monter 0.22s ease-out; }
-@keyframes monter { from { transform: translateY(100%); } }
-.feuille-contenu { padding: 12px var(--marge) calc(16px + env(safe-area-inset-bottom)); }
-.feuille-contenu::before {
-  content: "";
-  display: block;
-  width: 40px;
-  height: 5px;
-  margin: 0 auto 16px;
-  border-radius: 999px;
-  background: var(--bordure);
-}
-.feuille-contenu h2 { margin-bottom: 16px; font-size: 22px; font-weight: 800; outline: none; }
-.feuille-contenu > p { color: var(--texte-doux); }
+.ligne-grille-tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 8px; margin: -4px -6px 6px 0; }
+.ligne-grille-tete strong { font: 650 1rem/1.3 var(--e-police); }
+.e-formulaire fieldset > .e-btn { margin-bottom: var(--e-4); }
 
 /* ---------- Message temporaire ---------- */
 
+body { --decalage-message: 20px; }
 body.avec-onglets { --decalage-message: 86px; }
-body.avec-actions { --decalage-message: 92px; }
+body.avec-actions { --decalage-message: calc(var(--hauteur-barre, 80px) + 8px); }
 
 #toast {
   position: fixed;
@@ -965,27 +639,33 @@ body.avec-actions { --decalage-message: 92px; }
   max-width: 608px;
   margin: 0 auto;
   padding: 10px 10px 10px 18px;
+  border: 1px solid var(--e-message-bord);
   border-radius: 20px;
-  background: #2a2420;
-  color: #f7ecd9;
-  box-shadow: var(--ombre-flottante);
+  background: var(--e-message-fond);
+  color: var(--e-message-texte);
+  box-shadow: var(--e-ombre-flottante);
   opacity: 0;
   transform: translateY(16px);
   visibility: hidden;
   transition: opacity 0.2s, transform 0.2s, visibility 0s 0.2s;
 }
 #toast.visible { opacity: 1; transform: none; visibility: visible; transition: opacity 0.2s, transform 0.2s; }
-#toast p { flex: 1; margin: 0; font-size: 15px; }
+#toast p { flex: 1; margin: 0; font: 400 0.9375rem/1.4 var(--e-police); } /* suit la taille du texte de l'iPhone */
 #toast button {
   min-height: 44px;
   padding: 8px 10px;
   border: 0;
   background: none;
-  color: #ff9a7f;
-  font-size: 16px;
-  font-weight: 700;
+  color: var(--e-message-action);
+  font: 700 1rem/1.2 var(--e-police);
 }
 
+/* ---------- Moins d'animations si l'iPhone le demande ---------- */
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .bouton-rond:active,
+  #bouton-plus:active,
+  .btn-compteur:active,
+  .carte-choix:active,
+  .carte-lien:active { transform: none; }
 }

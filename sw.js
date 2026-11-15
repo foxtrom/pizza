@@ -7,7 +7,7 @@
 // Les caches s'appellent « pizzeria-… » : Brasserie Ensen, publiée sur le même
 // domaine github.io, supprime tous les caches « ensen-… » qui ne sont pas les siens.
 
-const VERSION = '0.2.2';
+const VERSION = '0.3.0';
 const PREFIXE = 'pizzeria-';
 const CACHE = `${PREFIXE}${VERSION}`;
 // Sur l'ordinateur (serveur local), les fichiers frais passent avant la copie : chaque modification
@@ -19,9 +19,11 @@ const FICHIERS = [
   './index.html',
   './manifest.webmanifest',
   './css/app.css',
+  './css/systeme.css',
   './js/app.js',
   './js/calculs.js',
   './js/carnet.js',
+  './js/composants.js',
   './js/db.js',
   './js/donnees.js',
   './js/ecrans.js',

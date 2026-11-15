@@ -19,6 +19,7 @@ import {
   pourcent,
 } from './outils.js';
 import { recetteDuMemeNom, TYPES_LEVURE } from './recettes.js';
+import { aideAlerte, badge, ligneAction, message, noteCompacte, noteEditable, points, SYMBOLES, vide } from './composants.js';
 import { ICONES, ILLUSTRATIONS } from './ui.js';
 
 const coche = (vrai) => (vrai ? brut('checked') : '');
@@ -51,18 +52,16 @@ export const boutonEnregistrer = (modifie) => html`<button type="button" class="
 </button>`;
 
 export const boutonsFormulaire = (retour) => html`
-  <a class="btn btn-geant" href="${retour}">Annuler</a>
-  <button type="submit" form="form-recette" class="btn btn-primaire btn-geant btn-principal">Enregistrer</button>`;
+  <a class="e-btn e-btn--secondaire" href="${retour}">Annuler</a>
+  <button type="submit" form="form-recette" class="e-btn e-btn--principal">Enregistrer</button>`;
 
 /* ================================================================== */
 /* Cartes en deux parties (voir DESIGN.md)                             */
 /* ================================================================== */
 
-/** Chiffres clés : nombre en gras, unité en gris, séparés par des points. */
-function chiffres(liste) {
-  return liste.map(
-    ([valeur, unite], i) => html`${i ? html`<span class="point" aria-hidden="true">·</span>` : ''}<span class="chiffre"><b>${valeur}</b> ${unite}</span>`,
-  );
+/** Chiffres clés : nombre en gras, unité en gris, séparés par des points (aucun point en début de ligne). */
+function chiffres(liste, ...enPlus) {
+  return points([...liste.map(([valeur, unite]) => html`<span class="chiffre"><b>${valeur}</b> ${unite}</span>`), ...enPlus]);
 }
 
 /** Chiffres clés d'une recette : pâtons, poids, hydratation, durée au frigo. */
@@ -102,28 +101,28 @@ export function texteLevure(recette, fournee) {
 
 /** Sous le champ de la levure : d'où vient la dose. */
 export function aideLevure(recette, fournee, erreur = null) {
-  if (erreur) return html`<p class="erreur">${erreur}</p>`;
+  if (erreur) return html`<p class="e-erreur">${erreur}</p>`;
   const proposee = levureDeLaGrille(recette, fournee.tempPiece);
   if (fournee.levurePct != null) {
-    return html`<p class="aide">Dose saisie pour cette fournée (${pourcent(fournee.levurePct, 3)} de la farine) : la recette n’est pas modifiée.</p>
+    return html`<p class="e-aide">Dose saisie pour cette fournée (${pourcent(fournee.levurePct, 3)} de la farine) : la recette n’est pas modifiée.</p>
       ${proposee
-        ? html`<button type="button" class="lien" data-action="levure-grille">Reprendre la dose de la grille : ${grammes(grammesLevure(recette, fournee.boules, proposee.pct), 2)}</button>`
+        ? html`<button type="button" class="e-btn e-btn--discret e-btn--petit" data-action="levure-grille">Reprendre la dose de la grille : ${grammes(grammesLevure(recette, fournee.boules, proposee.pct), 2)}</button>`
         : ''}`;
   }
-  if (fournee.tempPiece == null) return html`<p class="aide">Saisir d’abord la température de la pièce.</p>`;
+  if (fournee.tempPiece == null) return html`<p class="e-aide">Saisir d’abord la température de la pièce.</p>`;
   if (!proposee) {
-    return html`<p class="aide alerte">À saisir : la grille de la recette n’a pas de dose pour ${degres(fournee.tempPiece)}. Prendre celle de Pizza App pour ${pluriel(fournee.boules, 'boule')}.</p>`;
+    return aideAlerte(`À saisir : la grille de la recette n’a pas de dose pour ${degres(fournee.tempPiece)}. Prendre celle de Pizza App pour ${pluriel(fournee.boules, 'boule')}.`);
   }
-  return html`<p class="aide">${proposee.calculee ? '≈ Calculée entre deux températures de la grille' : `Dose de la grille pour ${degres(fournee.tempPiece)}`} (${pourcent(proposee.pct, 3)} de la farine).</p>`;
+  return html`<p class="e-aide">${proposee.calculee ? '≈ Calculée entre deux températures de la grille' : `Dose de la grille pour ${degres(fournee.tempPiece)}`} (${pourcent(proposee.pct, 3)} de la farine).</p>`;
 }
 
 /** Sous la température de la pièce : alerte si elle sort de la grille de la recette. */
 export function aideTemperature(recette, fournee, erreur = null) {
-  if (erreur) return html`<p class="erreur">${erreur}</p>`;
+  if (erreur) return html`<p class="e-erreur">${erreur}</p>`;
   const bornes = plageGrille(recette);
   const t = fournee.tempPiece;
   if (t == null || !bornes || bornes[0] === bornes[1] || (t >= bornes[0] && t <= bornes[1])) return '';
-  return html`<p class="aide alerte">Hors de la grille de la recette (${plage(bornes, '°C')}) : durées et température de l’eau seront indicatives.</p>`;
+  return aideAlerte(`Hors de la grille de la recette (${plage(bornes, '°C')}) : durées et température de l’eau seront indicatives.`);
 }
 
 /** Variables de la fournée telles qu'affichées : la recette choisie et ses boules par défaut. */
@@ -135,18 +134,10 @@ export function variablesFournee(etat) {
 
 export function ecranFournee(etat, erreurs = {}) {
   const { recettes } = etat.donnees;
-  if (!recettes.length) {
-    return html`<section class="vide">
-      <p>Aucune recette enregistrée.</p>
-      <div class="pile-boutons">
-        <a class="btn btn-primaire btn-geant" href="#/importer">${ICONES.coller}Importer depuis Pizza App</a>
-        <a class="btn btn-geant" href="#/nouvelle">${ICONES.crayon}Saisir une recette</a>
-      </div>
-    </section>`;
-  }
+  if (!recettes.length) return videRecettes('Aucune recette enregistrée.', SYMBOLES.part);
   const { recette, variables: f } = variablesFournee(etat);
   return html`
-    <h2 class="titre-section">Recette</h2>
+    <h2 class="e-titre-section">Recette</h2>
     <div class="choix-recettes" role="radiogroup" aria-label="Recette">
       ${recettes.map(
         (r) => html`<label class="carte carte-choix">
@@ -156,34 +147,46 @@ export function ecranFournee(etat, erreurs = {}) {
       )}
     </div>
     ${rappelFournees(etat, recette)}
-    <h2 class="titre-section">Nombre de boules</h2>
+    <h2 class="e-titre-section">Nombre de boules</h2>
     <div class="compteur-boules">
       <button type="button" class="btn-compteur" data-action="moins" aria-label="Une boule de moins">${ICONES.moins}</button>
       <input id="boules" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="${f.boules}" data-champ="boules" aria-label="Nombre de boules" autocomplete="off" enterkeyhint="done">
       <button type="button" class="btn-compteur" data-action="plus" aria-label="Une boule de plus">${ICONES.plus}</button>
     </div>
-    <h2 class="titre-section">Variables du jour</h2>
-    <div class="variables-duo">
-      <label class="champ-carte">
-        <span class="libelle-carte">Pièce</span>
-        <span class="valeur">
-          <input id="temp-piece" type="text" inputmode="decimal" value="${f.tempPiece == null ? '' : nombre(f.tempPiece, 1)}" data-champ="temp-piece" aria-label="Température de la pièce" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.tempPiece)}>
-          <span class="unite">°C</span>
-        </span>
-      </label>
-      <label class="champ-carte">
-        <span class="libelle-carte">Levure ${libelleLevure(recette)}</span>
-        <span class="valeur">
-          <input id="levure" type="text" inputmode="decimal" value="${texteLevure(recette, f)}" data-champ="levure" aria-label="Dose de levure en grammes" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.levure)}>
-          <span class="unite">g</span>
-        </span>
-      </label>
+    <h2 class="e-titre-section">Variables du jour</h2>
+    <div class="variables">
+      <div class="variables-duo">
+        <label class="champ-carte">
+          <span class="libelle-carte">Pièce</span>
+          <span class="valeur">
+            <input id="temp-piece" type="text" inputmode="decimal" value="${f.tempPiece == null ? '' : nombre(f.tempPiece, 1)}" data-champ="temp-piece" aria-label="Température de la pièce" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.tempPiece)}>
+            <span class="e-unite">°C</span>
+          </span>
+        </label>
+        <label class="champ-carte">
+          <span class="libelle-carte">Levure ${libelleLevure(recette)}</span>
+          <span class="valeur">
+            <input id="levure" type="text" inputmode="decimal" value="${texteLevure(recette, f)}" data-champ="levure" aria-label="Dose de levure en grammes" placeholder="—" autocomplete="off" enterkeyhint="done" ${invalide(erreurs.levure)}>
+            <span class="e-unite">g</span>
+          </span>
+        </label>
+      </div>
     </div>
     <div id="aide-temp">${aideTemperature(recette, f, erreurs.tempPiece)}</div>
     <div id="aide-levure">${aideLevure(recette, f, erreurs.levure)}</div>
     <div id="doses-fournee">${dosesFournee(recette, f)}</div>
-    <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="valider-fournee">Valider</button>
-    <p class="aide centre">Valider ouvre le récap : température de l’eau, pointage, frigo et remise à température.</p>`;
+    <button type="button" class="e-btn e-btn--principal e-btn--large" data-action="valider-fournee">Valider</button>
+    <p class="e-aide centre">Valider ouvre le récap : température de l’eau, pointage, frigo et remise à température.</p>`;
+}
+
+/** Aucune recette (écrans Fournée et Recettes) : importer depuis Pizza App, ou saisir à la main. */
+function videRecettes(titre, symbole) {
+  return vide({
+    symbole,
+    titre,
+    actions: html`<a class="e-btn e-btn--principal e-btn--large" href="#/importer">${SYMBOLES.coller}Importer depuis Pizza App</a>
+      <a class="e-btn e-btn--secondaire e-btn--large" href="#/nouvelle">${SYMBOLES.crayon}Saisir une recette</a>`,
+  });
 }
 
 
@@ -226,7 +229,7 @@ function carteDoses(s, { titre = 'Doses' } = {}) {
       <li class="versement"><span>Bassinage</span><strong>${grammes(s.eau.bassinage)}</strong></li>
       ${ligne('Sel', pourcent(r.sel), grammes(d.sel))}
       ${d.levure == null
-        ? ligne(libelleLevure(r), 'à compléter', '—', 'dose-manquante')
+        ? ligne(libelleLevure(r), html`${SYMBOLES.alerte}à compléter`, '—', 'dose-manquante')
         : ligne(libelleLevure(r), `${pourcent(s.levure.pct, 3)} · ${origineLevure}`, grammes(d.levure, 2))}
     </ul>
   </section>`;
@@ -258,39 +261,39 @@ function vueRecap(s) {
 
   return html`
     <div class="fiche-tete">
-      <p class="aide">${pluriel(s.boules, 'boule')} de ${grammes(r.poidsBoule)} · pièce à ${degres(s.tempPiece)}</p>
+      <p class="e-secondaire">${pluriel(s.boules, 'boule')} de ${grammes(r.poidsBoule)} · pièce à ${degres(s.tempPiece)}</p>
       <h2 class="fiche-nom">${r.nom}</h2>
     </div>
     ${s.horsGrille
-      ? html`<p class="banniere banniere-alerte">${ICONES.alerte}<span>La pièce est hors de la grille de la recette (${plage(s.horsGrille, '°C')}) : durées et température de l’eau sont indicatives.</span></p>`
+      ? message('alerte', `La pièce est hors de la grille de la recette (${plage(s.horsGrille, '°C')}) : durées et température de l’eau sont indicatives.`)
       : ''}
     ${carteDoses(s)}
-    <section class="bloc">
-      <h3>Pétrissage</h3>
+    <section class="e-bloc">
+      <h3 class="e-titre-section">Pétrissage</h3>
       <dl class="infos">
         <dt>Eau à</dt><dd>${s.tempEau ? texteLu(s.tempEau, (t) => degres(demiDegre(t))) : '—'}${s.tempEau ? '' : html`<small>la recette n’indique pas de température d’eau</small>`}</dd>
         <dt>Pâte visée</dt><dd>${plage(s.tempPate, '°C')}<small>en fin de pétrissage</small></dd>
       </dl>
     </section>
-    <section class="bloc">
-      <h3>Fermentation</h3>
+    <section class="e-bloc">
+      <h3 class="e-titre-section">Fermentation</h3>
       <dl class="infos">
         <dt>Pointage en masse</dt><dd>${s.pointage ? texteLu(s.pointage, formatDuree) : '—'}<small>${notePointage}</small></dd>
         <dt>Frigo</dt><dd>${s.froid.heures != null ? duree(s.froid.heures) : '—'}${s.froid.temp ? html`<small>à ${plage(s.froid.temp, '°C')}</small>` : ''}</dd>
         <dt>Remise à température</dt><dd>${s.remise?.valeur != null ? texteLu(s.remise, formatDuree) : '—'}<small>${noteRemise}</small></dd>
       </dl>
-      <p class="aide">Repère de remise à température : pâton gonflé, souple, qui revient lentement au doigt.</p>
+      <p class="e-aide">Repère de remise à température : pâton gonflé, souple, qui revient lentement au doigt.</p>
     </section>`;
 }
 
 export function ecranRecap(etat) {
   const { recette, variables } = variablesFournee(etat);
   return html`${vueRecap(instantane(recette, calculerFournee(recette, variables)))}
-    <div class="pile-boutons actions-bas">
-      <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="ajouter-carnet">${ICONES.carnet}Ajouter au carnet</button>
-      <a class="btn btn-large" href="#/">${ICONES.retour}Modifier les variables</a>
+    <div class="e-pile actions-bas">
+      <button type="button" class="e-btn e-btn--principal e-btn--large" data-action="ajouter-carnet">${SYMBOLES.carnet}Ajouter au carnet</button>
+      <a class="e-btn e-btn--secondaire e-btn--large" href="#/">${SYMBOLES.retour}Modifier les variables</a>
     </div>
-    <p class="aide centre">Le carnet garde ce récap ; le résultat s’y note après la cuisson.</p>`;
+    <p class="e-aide centre">Le carnet garde ce récap ; le résultat s’y note après la cuisson.</p>`;
 }
 
 /* ================================================================== */
@@ -304,16 +307,12 @@ export function dateFournee(iso) {
   return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', ...(autreAnnee ? { year: 'numeric' } : {}) });
 }
 const dateCourte = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-const etoilesTexte = (note) => '★'.repeat(note) + '☆'.repeat(5 - note);
+const extrait = (texte) => `« ${texte.length > 90 ? `${texte.slice(0, 90)}…` : texte} »`;
 
-/** « ★★★★☆ · Facile à étaler · « Très bonne pâte » ». */
+/** « ★ 4/5 · Facile à étaler · « Très bonne pâte » ». */
 function resumeResultat(e) {
-  const morceaux = [];
-  if (e.resultat.note) morceaux.push(etoilesTexte(e.resultat.note));
-  morceaux.push(...e.resultat.constats.map(libelleConstat));
   const commentaire = e.resultat.commentaire.trim();
-  if (commentaire) morceaux.push(`« ${commentaire.length > 90 ? `${commentaire.slice(0, 90)}…` : commentaire} »`);
-  return morceaux.join(' · ');
+  return points([noteCompacte(e.resultat.note), ...e.resultat.constats.map(libelleConstat), commentaire && extrait(commentaire)]);
 }
 
 /** Sur l'écran Fournée : ce qu'a donné la dernière fournée de cette recette. */
@@ -322,13 +321,19 @@ function rappelFournees(etat, recette) {
   if (!derniere) return '';
   return html`<div class="rappels">
     ${dernierResultat
-      ? html`<a class="rappel" href="#/carnet/${dernierResultat.id}">
-          <span class="rappel-titre">Dernier résultat · ${dateCourte(dernierResultat.date)} · pièce à ${degres(dernierResultat.tempPiece)}</span>
-          <span>${resumeResultat(dernierResultat)}</span>
+      ? html`<a class="rappel rappel--ok" href="#/carnet/${dernierResultat.id}">
+          ${SYMBOLES.carnet}
+          <span class="rappel-texte">
+            <b>Dernier résultat · ${dateCourte(dernierResultat.date)} · pièce à ${degres(dernierResultat.tempPiece)}</b>
+            <span>${resumeResultat(dernierResultat)}</span>
+          </span>
+          ${SYMBOLES.suivant}
         </a>`
       : ''}
     ${derniere !== dernierResultat
-      ? html`<a class="rappel rappel-attente" href="#/carnet/${derniere.id}">La fournée du ${dateCourte(derniere.date)} attend son résultat.</a>`
+      ? html`<a class="rappel rappel--attente" href="#/carnet/${derniere.id}">
+          ${SYMBOLES.horloge}<span class="rappel-texte">La fournée du ${dateCourte(derniere.date)} attend son résultat.</span>${SYMBOLES.suivant}
+        </a>`
       : ''}
   </div>`;
 }
@@ -336,10 +341,11 @@ function rappelFournees(etat, recette) {
 export function ecranCarnet(etat) {
   const { fournees } = etat.donnees;
   if (!fournees.length) {
-    return html`<section class="vide">
-      <p>Aucune fournée dans le carnet.</p>
-      <p class="aide">Sur le récap d’une fournée, « Ajouter au carnet » l’enregistre ici. Après la cuisson, y noter le résultat aide à ajuster les fournées suivantes.</p>
-    </section>`;
+    return vide({
+      symbole: SYMBOLES.carnet,
+      titre: 'Aucune fournée dans le carnet.',
+      texte: 'Sur le récap d’une fournée, « Ajouter au carnet » l’enregistre ici. Après la cuisson, y noter le résultat aide à ajuster les fournées suivantes.',
+    });
   }
   return html`<ul class="liste-cartes">${fournees.map((e) => {
     const commentaire = e.resultat.commentaire.trim();
@@ -348,20 +354,22 @@ export function ecranCarnet(etat) {
         <span class="carte-texte">
           <strong class="carte-nom">${dateFournee(e.date)}</strong>
           <small class="carte-sous">${e.recette.nom}</small>
-          <span class="pastilles">${aUnResultat(e)
-            ? e.resultat.constats.map((code) => html`<span class="pastille pastille-basilic">${libelleConstat(code)}</span>`)
-            : html`<span class="pastille pastille-alerte">Résultat à compléter</span>`}</span>
+          <span class="e-badges">${aUnResultat(e)
+            ? e.resultat.constats.map((code) => badge('neutre', libelleConstat(code)))
+            : badge('attente', 'Résultat à compléter')}</span>
         </span>
         <span class="carte-illus">${ILLUSTRATIONS.pizza}</span>
       </span>
       <span class="carte-pied">
-        ${chiffres([
-          [e.boules, e.boules >= 2 ? 'boules' : 'boule'],
-          [nombre(e.tempPiece, 1), '°C'],
-          [e.doses.levure == null ? '—' : nombre(e.doses.levure, 2, 2), `g ${e.recette.typeLevure}`],
-        ])}
-        ${e.resultat.note ? html`<span class="point" aria-hidden="true">·</span><span class="etoiles-texte" aria-label="Note : ${e.resultat.note} sur 5">${etoilesTexte(e.resultat.note)}</span>` : ''}
-        ${commentaire ? html`<span class="carte-note">« ${commentaire.length > 90 ? `${commentaire.slice(0, 90)}…` : commentaire} »</span>` : ''}
+        ${chiffres(
+          [
+            [e.boules, e.boules >= 2 ? 'boules' : 'boule'],
+            [nombre(e.tempPiece, 1), '°C'],
+            [e.doses.levure == null ? '—' : nombre(e.doses.levure, 2, 2), `g ${e.recette.typeLevure}`],
+          ],
+          noteCompacte(e.resultat.note),
+        )}
+        ${commentaire ? html`<span class="carte-note">${extrait(commentaire)}</span>` : ''}
       </span>
     </a></li>`;
   })}</ul>`;
@@ -370,24 +378,20 @@ export function ecranCarnet(etat) {
 /** Sous le résultat : enregistré, ou des changements qui attendent « Enregistrer ». */
 export function etatResultat(entree, brouillon) {
   if (resultatModifie(entree, brouillon)) {
-    return html`<p class="aide alerte">Modifications non enregistrées : toucher « Enregistrer » en haut à droite pour les garder.</p>`;
+    return aideAlerte('Modifications non enregistrées : toucher « Enregistrer » en haut à droite pour les garder.');
   }
   return aUnResultat(entree)
-    ? html`<p class="aide">Résultat enregistré.</p>`
-    : html`<p class="aide">Noter le résultat, puis toucher « Enregistrer » en haut à droite.</p>`;
+    ? html`<p class="e-aide">Résultat enregistré.</p>`
+    : html`<p class="e-aide">Noter le résultat, puis toucher « Enregistrer » en haut à droite.</p>`;
 }
 
 /** Une fournée du carnet : le résultat à compléter (copie de travail), puis son récap figé. */
 export function ecranEntree(etat, e, brouillon) {
   const r = brouillon;
   return html`
-    <section class="bloc resultat-fournee">
-      <h3>Résultat · ${dateFournee(e.date)}</h3>
-      <div class="etoiles" role="group" aria-label="Note sur 5">
-        ${[1, 2, 3, 4, 5].map(
-          (i) => html`<button type="button" class="${i <= (r.note ?? 0) ? 'pleine' : ''}" data-action="noter" data-id="${e.id}" data-note="${i}" aria-label="${i} sur 5" aria-pressed="${String(i === r.note)}">★</button>`,
-        )}
-      </div>
+    <section class="e-bloc resultat-fournee">
+      <h3 class="e-titre-section">Résultat · ${dateFournee(e.date)}</h3>
+      ${noteEditable(r.note, e.id)}
       <div class="constats">
         ${CONSTATS.map(
           ([code, libelle]) => html`<label class="constat">
@@ -396,14 +400,14 @@ export function ecranEntree(etat, e, brouillon) {
           </label>`,
         )}
       </div>
-      <label class="champ">
-        <span class="libelle">Commentaire</span>
+      <label class="e-champ">
+        <span class="e-libelle">Commentaire</span>
         <textarea rows="5" data-champ="commentaire" data-id="${e.id}" placeholder="Pâte facile à étaler ? Cuisson ? À changer la prochaine fois ?">${r.commentaire}</textarea>
       </label>
       <div id="etat-resultat">${etatResultat(e, brouillon)}</div>
     </section>
     ${vueRecap(e)}
-    <button type="button" class="btn btn-danger btn-large actions-bas" data-action="supprimer-entree" data-id="${e.id}">Supprimer cette fournée</button>`;
+    <button type="button" class="e-btn e-btn--danger e-btn--large actions-bas" data-action="supprimer-entree" data-id="${e.id}">Supprimer cette fournée</button>`;
 }
 
 /* ================================================================== */
@@ -418,30 +422,22 @@ export const actionsRecettes = () => html`
 /** État de la levure d'une recette, sous son nom : grille, référence, ou à compléter. */
 function etatLevure(r) {
   const releve = releveDeReference(r);
-  if (!releve) return html`<span class="pastille pastille-alerte">${libelleLevure(r)} à compléter</span>`;
-  if (r.grille.length > 1) return html`<span class="pastille">Grille ${plage([r.grille[0].temp, r.grille.at(-1).temp], '°C')}</span>`;
-  return html`<span class="pastille">${libelleLevure(r)} à ${degres(releve.temp)}</span>`;
+  if (!releve) return badge('alerte', `${libelleLevure(r)} à compléter`);
+  if (r.grille.length > 1) return badge('neutre', `Grille ${plage([r.grille[0].temp, r.grille.at(-1).temp], '°C')}`, SYMBOLES.thermometre);
+  return badge('neutre', `${libelleLevure(r)} à ${degres(releve.temp)}`, SYMBOLES.thermometre);
 }
 
 export function ecranRecettes(etat) {
   const { recettes, fournee } = etat.donnees;
-  if (!recettes.length) {
-    return html`<section class="vide">
-      <p>Aucune recette pour l’instant.</p>
-      <div class="pile-boutons">
-        <a class="btn btn-primaire btn-geant" href="#/importer">${ICONES.coller}Importer depuis Pizza App</a>
-        <a class="btn btn-geant" href="#/nouvelle">${ICONES.crayon}Saisir une recette</a>
-      </div>
-    </section>`;
-  }
+  if (!recettes.length) return videRecettes('Aucune recette pour l’instant.', SYMBOLES.livre);
   return html`<ul class="liste-cartes">${recettes.map(
     (r) => html`<li><a class="carte carte-lien" href="#/recette/${r.id}">
       ${contenuCarteRecette(r, {
-        marque: html`<span class="pastilles">${r.id === fournee.recetteId ? html`<span class="pastille pastille-accent">Fournée</span>` : ''}${etatLevure(r)}</span>`,
+        marque: html`<span class="e-badges">${r.id === fournee.recetteId ? badge('fournee', 'Fournée') : ''}${etatLevure(r)}</span>`,
       })}
     </a></li>`,
   )}</ul>
-  <p class="aide centre intro">Importer depuis Pizza App ou saisir : boutons ronds en haut, ou « + » en bas.</p>`;
+  <p class="e-aide centre aide-liste">Importer depuis Pizza App ou saisir : boutons ronds en haut, ou « + » en bas.</p>`;
 }
 
 // Valeurs calculées entre deux températures : arrondies à ce qui sert en cuisine.
@@ -479,15 +475,15 @@ function blocGrille(r) {
     calculees && '≈ : calculé entre les deux températures voisines',
     manquantes && '— : dose à compléter',
   ].filter(Boolean);
-  return html`<section class="bloc">
-    <h3>Grille par température de la pièce</h3>
+  return html`<section class="e-bloc">
+    <h3 class="e-titre-section">Grille par température de la pièce</h3>
     <div class="defilement">
       <table class="grille-temp">
         <thead><tr><th scope="col">Pièce</th>${colonnes.map(([, titre]) => html`<th scope="col">${titre}</th>`)}</tr></thead>
         <tbody>${lignes}</tbody>
       </table>
     </div>
-    <p class="aide">${legende.join(' ; ')}.${r.grille.some((g) => g.tempEau != null) ? ' Eau : température de l’eau du pétrissage.' : ''}</p>
+    <p class="e-aide">${legende.join(' ; ')}.${r.grille.some((g) => g.tempEau != null) ? ' Eau : température de l’eau du pétrissage.' : ''}</p>
   </section>`;
 }
 
@@ -496,10 +492,10 @@ export function ecranRecette(etat, r) {
   const [point1, point2] = r.remiseDefaut;
   const four = r.four;
   return html`
-    <section class="carte carte-heros">${contenuCarteRecette(r, { marque: html`<span class="pastilles">${etatLevure(r)}</span>` })}</section>
-    <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="utiliser" data-id="${r.id}">${ICONES.part}Préparer une fournée</button>
-    <section class="bloc">
-      <h3>Pâte de référence</h3>
+    <section class="carte carte-heros">${contenuCarteRecette(r, { marque: html`<span class="e-badges">${etatLevure(r)}</span>` })}</section>
+    <button type="button" class="e-btn e-btn--principal e-btn--large" data-action="utiliser" data-id="${r.id}">${SYMBOLES.part}Préparer une fournée</button>
+    <section class="e-bloc">
+      <h3 class="e-titre-section">Pâte de référence</h3>
       <dl class="infos">
         <dt>Boules</dt><dd>${r.boules} × ${grammes(r.poidsBoule)}</dd>
         <dt>Eau</dt><dd>${pourcent(r.hydratation)}</dd>
@@ -510,8 +506,8 @@ export function ecranRecette(etat, r) {
         <dt>Pâte visée</dt><dd>${plage(r.tempPate, '°C')}<small>en fin de pétrissage</small></dd>
       </dl>
     </section>
-    <section class="bloc">
-      <h3>Fermentation</h3>
+    <section class="e-bloc">
+      <h3 class="e-titre-section">Fermentation</h3>
       <dl class="infos">
         <dt>Pointage</dt><dd>${r.pointage != null ? duree(r.pointage) : 'selon la grille'}</dd>
         <dt>Frigo</dt><dd>${r.froid.heures != null ? duree(r.froid.heures) : '—'}${r.froid.temp ? html`<small>à ${plage(r.froid.temp, '°C')}</small>` : ''}</dd>
@@ -522,8 +518,8 @@ export function ecranRecette(etat, r) {
     </section>
     ${r.grille.length ? blocGrille(r) : ''}
     ${four
-      ? html`<section class="bloc">
-          <h3>Four</h3>
+      ? html`<section class="e-bloc">
+          <h3 class="e-titre-section">Four</h3>
           <dl class="infos">
             ${four.type || four.sole ? html`<dt>Four</dt><dd>${[four.type, four.sole && `sole ${four.sole}`].filter(Boolean).join(', ')}</dd>` : ''}
             ${four.temp ? html`<dt>Température</dt><dd>${plage(four.temp, '°C', 0)}</dd>` : ''}
@@ -531,16 +527,16 @@ export function ecranRecette(etat, r) {
           </dl>
         </section>`
       : ''}
-    ${r.notes ? html`<section class="bloc"><h3>Notes</h3><p class="notes">${r.notes}</p></section>` : ''}
+    ${r.notes ? html`<section class="e-bloc"><h3 class="e-titre-section">Notes</h3><p class="notes">${r.notes}</p></section>` : ''}
     ${r.texteImporte
-      ? html`<details class="bloc details-import">
+      ? html`<details class="e-bloc details-import">
           <summary>Texte importé${r.source === 'pizzapp' ? ' de Pizza App' : ''}</summary>
           <pre class="texte-importe">${r.texteImporte}</pre>
         </details>`
       : ''}
-    <div class="pile-boutons actions-bas">
-      <a class="btn btn-large" href="#/recette/${r.id}/modifier">${ICONES.crayon}Modifier</a>
-      <button type="button" class="btn btn-danger btn-large" data-action="supprimer" data-id="${r.id}">Supprimer</button>
+    <div class="e-pile actions-bas">
+      <a class="e-btn e-btn--secondaire e-btn--large" href="#/recette/${r.id}/modifier">${SYMBOLES.crayon}Modifier</a>
+      <button type="button" class="e-btn e-btn--danger e-btn--large" data-action="supprimer" data-id="${r.id}">Supprimer</button>
     </div>`;
 }
 
@@ -552,24 +548,24 @@ export function ecranImport(etat) {
   const imp = etat.import;
   return html`
     <form id="form-import" data-form="lire-import" novalidate>
-      <label class="champ">
-        <span class="libelle">Texte de la recette</span>
+      <label class="e-champ">
+        <span class="e-libelle">Texte de la recette</span>
         <textarea id="texte-import" data-champ="texte-import" rows="9" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="Coller ici le texte partagé depuis Pizza App, ou un bloc JSON.">${imp.texte}</textarea>
       </label>
-      <p class="aide">Dans Pizza App : partager la recette, copier le texte, puis le coller ici.</p>
-      <div class="deux-boutons">
+      <p class="e-aide">Dans Pizza App : partager la recette, copier le texte, puis le coller ici.</p>
+      <div class="e-actions">
         ${etat.peutColler
-          ? html`<button type="button" class="btn btn-geant" data-action="coller">${ICONES.coller}Coller</button>`
-          : html`<button type="button" class="btn btn-geant" data-action="effacer-import">Effacer</button>`}
-        <button type="submit" class="btn btn-primaire btn-geant">Lire la recette</button>
+          ? html`<button type="button" class="e-btn e-btn--secondaire" data-action="coller">${SYMBOLES.coller}Coller</button>`
+          : html`<button type="button" class="e-btn e-btn--secondaire" data-action="effacer-import">Effacer</button>`}
+        <button type="submit" class="e-btn ${imp.resultats ? 'e-btn--secondaire' : 'e-btn--principal'}">Lire la recette</button>
       </div>
-      ${etat.peutColler && imp.texte ? html`<button type="button" class="btn btn-discret btn-large" data-action="effacer-import">Effacer le texte</button>` : ''}
+      ${etat.peutColler && imp.texte ? html`<button type="button" class="e-btn e-btn--discret e-btn--large" data-action="effacer-import">Effacer le texte</button>` : ''}
     </form>
     <div id="resultat-import">
       ${imp.erreur ? blocErreurImport(imp.erreur) : ''}
       ${imp.resultats
         ? html`${imp.resultats.map((res, i) => apercuImport(res, i, etat))}
-          <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="enregistrer-import">${
+          <button type="button" class="e-btn e-btn--principal e-btn--large" data-action="enregistrer-import">${
             imp.resultats.length > 1 ? `Enregistrer les ${imp.resultats.length} recettes` : 'Enregistrer la recette'
           }</button>`
         : ''}
@@ -577,12 +573,14 @@ export function ecranImport(etat) {
 }
 
 function blocErreurImport(erreur) {
-  return html`<section class="bloc bloc-alerte">
-    <h3>${ICONES.alerte}Lecture impossible</h3>
-    <p>${erreur.message}</p>
-    ${erreur.valeurs
-      ? html`<button type="button" class="btn btn-large" data-action="saisie-depuis-import">${ICONES.crayon}Compléter à la main</button>`
-      : html`<a class="btn btn-large" href="#/nouvelle">${ICONES.crayon}Saisir la recette à la main</a>`}
+  return html`<section class="e-bloc">
+    <h3 class="e-titre-section">Lecture impossible</h3>
+    ${message('erreur', erreur.message)}
+    <div class="e-pile actions-bas">
+      ${erreur.valeurs
+        ? html`<button type="button" class="e-btn e-btn--secondaire e-btn--large" data-action="saisie-depuis-import">${SYMBOLES.crayon}Compléter à la main</button>`
+        : html`<a class="e-btn e-btn--secondaire e-btn--large" href="#/nouvelle">${SYMBOLES.crayon}Saisir la recette à la main</a>`}
+    </div>
   </section>`;
 }
 
@@ -590,8 +588,8 @@ function blocErreurImport(erreur) {
 export function zoneDoublon(res, i, doublon) {
   if (!doublon) return '';
   return html`<div class="doublon">
-    <p class="aide alerte">« ${doublon.nom} » existe déjà.</p>
-    <div class="segments" role="radiogroup" aria-label="Recette du même nom">
+    ${aideAlerte(`« ${doublon.nom} » existe déjà.`)}
+    <div class="e-segments" role="radiogroup" aria-label="Recette du même nom">
       <label><input type="radio" name="doublon-${i}" value="remplacer" data-champ="choix-doublon" data-index="${i}" ${coche(res.choix === 'remplacer')}><span>La remplacer</span></label>
       <label><input type="radio" name="doublon-${i}" value="garder" data-champ="choix-doublon" data-index="${i}" ${coche(res.choix === 'garder')}><span>Garder les deux</span></label>
     </div>
@@ -610,7 +608,7 @@ function blocControle(v, r) {
   const ok = !v.ecarts.length;
   const titre = v.identiques ? 'Doses identiques à Pizza App' : ok ? 'Doses identiques à Pizza App, à un arrondi près' : 'Écart avec les doses de Pizza App';
   return html`<div class="controle ${ok ? 'controle-ok' : 'controle-ecart'}">
-    <p class="controle-titre">${ok ? ICONES.ok : ICONES.alerte}<span>${titre}</span></p>
+    <p class="controle-titre">${ok ? SYMBOLES.ok : SYMBOLES.alerte}<span>${titre}</span></p>
     <table class="tableau-controle">
       <thead><tr><th scope="col">${pluriel(v.boules, 'boule')}</th><th scope="col">Pizza App</th><th scope="col">Recalcul</th></tr></thead>
       <tbody>${ligne('Farine', 'farine')}${ligne('Eau', 'eau')}${ligne('Sel', 'sel')}${ligne(libelleLevure(r), 'levure', 2)}</tbody>
@@ -622,10 +620,10 @@ function apercuImport(res, i, etat) {
   const r = res.recette;
   const releve = releveDeReference(r);
   const doublon = recetteDuMemeNom(etat.donnees.recettes, res.nom.trim() || r.nom);
-  return html`<section class="bloc apercu">
-    <h3>${ICONES.ok}${r.source === 'pizzapp' ? 'Recette Pizza App lue' : 'Recette JSON lue'}</h3>
-    <label class="champ">
-      <span class="libelle">Nom de la recette</span>
+  return html`<section class="e-bloc apercu">
+    <h3 class="e-titre-section e-titre-ok">${SYMBOLES.ok}${r.source === 'pizzapp' ? 'Recette Pizza App lue' : 'Recette JSON lue'}</h3>
+    <label class="e-champ">
+      <span class="e-libelle">Nom de la recette</span>
       <input type="text" value="${res.nom}" data-champ="nom-import" data-index="${i}" autocomplete="off" enterkeyhint="done">
     </label>
     <div id="doublon-${i}">${zoneDoublon(res, i, doublon)}</div>
@@ -644,7 +642,7 @@ function apercuImport(res, i, etat) {
         : ''}
     </dl>
     ${res.verification ? blocControle(res.verification, r) : ''}
-    ${res.avertissements.map((a) => html`<p class="banniere banniere-alerte">${ICONES.alerte}<span>${a}</span></p>`)}
+    ${res.avertissements.map((a) => message('alerte', a))}
     ${res.ignorees.length
       ? html`<details>
           <summary>${pluriel(res.ignorees.length, 'ligne non reconnue', 'lignes non reconnues')}</summary>
@@ -661,19 +659,19 @@ function apercuImport(res, i, etat) {
 export function ecranFormulaire(etat, recette = null) {
   const { valeurs: v, erreurs: e, general } = etat.formulaire;
   const nombreSaisi = (nom, libelle, { mode = 'decimal', unite = '', valeur = v[nom] } = {}) => html`
-    <label class="champ">
-      <span class="libelle">${libelle}</span>
-      <span class="champ-unite">
+    <label class="e-champ">
+      <span class="e-libelle">${libelle}</span>
+      <span class="e-champ-unite">
         <input type="text" name="${nom}" value="${valeur ?? ''}" inputmode="${mode}" autocomplete="off" ${invalide(e[nom])}>
-        <span class="unite" aria-hidden="${unite ? 'false' : 'true'}">${unite}</span>
+        <span class="e-unite" aria-hidden="${unite ? 'false' : 'true'}">${unite}</span>
       </span>
-      ${e[nom] ? html`<span class="erreur">${e[nom]}</span>` : ''}
+      ${e[nom] ? html`<span class="e-erreur">${e[nom]}</span>` : ''}
     </label>`;
   const texteSaisi = (nom, libelle, placeholder = '') => html`
-    <label class="champ">
-      <span class="libelle">${libelle}</span>
+    <label class="e-champ">
+      <span class="e-libelle">${libelle}</span>
       <input type="text" name="${nom}" value="${v[nom] ?? ''}" placeholder="${placeholder}" autocomplete="off" ${invalide(e[nom])}>
-      ${e[nom] ? html`<span class="erreur">${e[nom]}</span>` : ''}
+      ${e[nom] ? html`<span class="e-erreur">${e[nom]}</span>` : ''}
     </label>`;
   const types = { ...TYPES_LEVURE };
   if (v.typeLevure && !types[v.typeLevure]) types[v.typeLevure] = v.typeLevure;
@@ -685,9 +683,9 @@ export function ecranFormulaire(etat, recette = null) {
     return html`<div class="ligne-grille">
       <div class="ligne-grille-tete">
         <strong>${ligne.temp ? `Pièce à ${ligne.temp} °C` : 'Nouvelle température'}</strong>
-        <button type="button" class="btn-petit btn-discret" data-action="supprimer-ligne" data-index="${i}">Retirer</button>
+        <button type="button" class="e-btn e-btn--discret e-btn--petit" data-action="supprimer-ligne" data-index="${i}">Retirer</button>
       </div>
-      <div class="deux-colonnes">
+      <div class="e-deux-colonnes">
         ${champ('temp', 'Pièce', '°C')}
         ${champ('levure', 'Levure', 'g')}
         ${champ('tempEau', 'Eau', '°C')}
@@ -700,54 +698,57 @@ export function ecranFormulaire(etat, recette = null) {
     </div>`;
   };
 
-  return html`<form id="form-recette" data-form="recette" novalidate>
-    ${general ? html`<p class="banniere banniere-info">${general}</p>` : ''}
+  return html`<form id="form-recette" class="e-formulaire" data-form="recette" novalidate>
+    ${general ? message('info', general) : ''}
     <fieldset>
       <legend>Recette</legend>
       ${texteSaisi('nom', 'Nom', 'Napolitaine 24 h')}
-      <div class="deux-colonnes">
+      <div class="e-deux-colonnes">
         ${texteSaisi('style', 'Style', 'Napolitaine')}
         ${texteSaisi('farine', 'Farine', 'Caputo Cuoco')}
       </div>
     </fieldset>
     <fieldset>
       <legend>Pâte, comme dans Pizza App</legend>
-      <div class="deux-colonnes">
+      <div class="e-deux-colonnes">
         ${nombreSaisi('boules', 'N. boules', { mode: 'numeric' })}
         ${nombreSaisi('poidsBoule', 'Poids boule', { unite: 'g' })}
         ${nombreSaisi('hydratation', 'Eau', { unite: '%' })}
         ${nombreSaisi('sel', 'Sel', { unite: '%' })}
         ${nombreSaisi('premierVersement', '1er versement d’eau', { unite: '%' })}
       </div>
-      <p class="aide">1er versement : part de l’eau versée au début du pétrissage ; le reste est ajouté en bassinage.</p>
+      <p class="e-aide">1er versement : part de l’eau versée au début du pétrissage ; le reste est ajouté en bassinage.</p>
     </fieldset>
     <fieldset>
       <legend>Levure et grille par température</legend>
-      <label class="champ">
-        <span class="libelle">Type de levure</span>
+      <label class="e-champ">
+        <span class="e-libelle">Type de levure</span>
         <select name="typeLevure">${Object.entries(types).map(
           ([code, libelle]) => html`<option value="${code}" ${code === v.typeLevure ? brut('selected') : ''}>${libelle}</option>`,
         )}</select>
       </label>
-      <p class="aide">Une ligne par température de la pièce. Levure : dose donnée par Pizza App pour ${boules} boules à cette température (« LBF » et « TA »). Eau, pointage et remise : facultatifs.</p>
-      ${e.grille ? html`<p class="erreur">${e.grille}</p>` : ''}
+      <p class="e-aide">Une ligne par température de la pièce. Levure : dose donnée par Pizza App pour ${boules} boules à cette température (« LBF » et « TA »). Eau, pointage et remise : facultatifs.</p>
+      ${e.grille ? html`<p class="e-erreur erreur-grille">${e.grille}</p>` : ''}
       <div class="grille-edition">${v.grille.map(ligneGrille)}</div>
-      <button type="button" class="btn btn-large" data-action="ajouter-ligne">${ICONES.plus}Ajouter une température</button>
+      <button type="button" class="e-btn e-btn--secondaire e-btn--large" data-action="ajouter-ligne">${SYMBOLES.plus}Ajouter une température</button>
     </fieldset>
     <fieldset>
       <legend>Fermentation</legend>
-      <div class="deux-colonnes">
+      <div class="e-deux-colonnes">
         ${nombreSaisi('pointage', 'Pointage', { unite: 'h' })}
         ${nombreSaisi('froidHeures', 'Frigo', { unite: 'h' })}
       </div>
-      <p class="aide">Pointage : durée fixe (« Levage à TA » dans Pizza App), utilisée quand la grille n’en donne pas. Frigo : « Levage à CT ».</p>
+      <p class="e-aide">Pointage : durée fixe (« Levage à TA » dans Pizza App), utilisée quand la grille n’en donne pas. Frigo : « Levage à CT ».</p>
       <input type="hidden" name="froidMin" value="${v.froidMin ?? ''}">
       <input type="hidden" name="froidMax" value="${v.froidMax ?? ''}">
     </fieldset>
-    <label class="champ">
-      <span class="libelle">Notes</span>
-      <textarea name="notes" rows="4">${v.notes ?? ''}</textarea>
-    </label>
+    <fieldset>
+      <legend>Notes</legend>
+      <label class="e-champ">
+        <span class="e-cache">Notes</span>
+        <textarea name="notes" rows="4">${v.notes ?? ''}</textarea>
+      </label>
+    </fieldset>
   </form>`;
 }
 
@@ -763,27 +764,27 @@ export function ecranReglages(etat) {
     ['sombre', 'Sombre'],
   ];
   return html`
-    <section class="bloc">
-      <h3>Apparence</h3>
-      <div class="segments" role="radiogroup" aria-label="Thème">
+    <section class="e-bloc">
+      <h3 class="e-titre-section">Apparence</h3>
+      <div class="e-segments" role="radiogroup" aria-label="Thème">
         ${themes.map(
           ([valeur, libelle]) => html`<label><input type="radio" name="theme" value="${valeur}" data-reglage="theme" ${coche(reglages.theme === valeur)}><span>${libelle}</span></label>`,
         )}
       </div>
-      <p class="aide">Auto suit le réglage clair ou sombre de l’iPhone.</p>
+      <p class="e-aide">Auto suit le réglage clair ou sombre de l’iPhone.</p>
     </section>
-    <section class="bloc">
-      <h3>Sauvegarde</h3>
-      <p>Les recettes et le carnet sont enregistrés sur ce téléphone uniquement. Exporter régulièrement une sauvegarde dans Fichiers.</p>
-      <p class="aide">Dernière sauvegarde : ${meta.derniereSauvegarde ? dateLisible(meta.derniereSauvegarde) : 'jamais'}</p>
-      <div class="pile-boutons">
-        <button type="button" class="btn btn-large" data-action="exporter">${ICONES.exporter}Exporter une sauvegarde</button>
-        <button type="button" class="btn btn-large" data-action="restaurer">${ICONES.restaurer}Restaurer une sauvegarde</button>
+    <section class="e-bloc">
+      <h3 class="e-titre-section">Sauvegarde</h3>
+      <p class="e-texte">Les recettes et le carnet sont enregistrés sur ce téléphone uniquement. Exporter régulièrement une sauvegarde dans Fichiers.</p>
+      <p class="e-aide">Dernière sauvegarde : ${meta.derniereSauvegarde ? dateLisible(meta.derniereSauvegarde) : 'jamais'}</p>
+      <div class="e-menu e-menu--separe">
+        ${ligneAction({ action: 'exporter', symbole: SYMBOLES.exporter, titre: 'Exporter une sauvegarde', detail: 'Un fichier à enregistrer dans Fichiers' })}
+        ${ligneAction({ action: 'restaurer', symbole: SYMBOLES.importer, titre: 'Restaurer une sauvegarde', detail: 'Remplace les données de ce téléphone' })}
       </div>
     </section>
-    <section class="bloc">
-      <h3>À propos</h3>
-      <p>Pizzeria Ensen · ${pluriel(recettes.length, 'recette')} · ${pluriel(fournees.length, 'fournée')} au carnet</p>
-      <p class="aide">Version <span id="version">${etat.version ?? '…'}</span> · stockage ${etat.persistant ? 'persistant' : 'standard'}</p>
+    <section class="e-bloc">
+      <h3 class="e-titre-section">À propos</h3>
+      <p class="e-texte">Pizzeria Ensen · ${pluriel(recettes.length, 'recette')} · ${pluriel(fournees.length, 'fournée')} au carnet</p>
+      <p class="e-aide">Version <span id="version">${etat.version ?? '…'}</span> · stockage ${etat.persistant ? 'persistant' : 'standard'}</p>
     </section>`;
 }

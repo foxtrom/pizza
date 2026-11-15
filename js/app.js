@@ -46,6 +46,7 @@ import {
   valeursEnTexte,
   valeursFormulaire,
 } from './recettes.js';
+import { ligneAction, SYMBOLES } from './composants.js';
 import { confirmer, fermerFeuille, ICONES, ouvrirFeuille, toast } from './ui.js';
 
 const $ = (selecteur) => document.querySelector(selecteur);
@@ -227,6 +228,7 @@ function afficher() {
   zoneEntete.classList.toggle('collant', collant);
   $('#vue').innerHTML = String(contenu);
   $('#barre-actions').innerHTML = String(actions);
+  ajusterBarre();
 
   const avecActions = String(actions).trim() !== '';
   const onglets = $('#onglets');
@@ -251,6 +253,14 @@ function afficher() {
     $('#vue').focus({ preventScroll: true });
   }
   etat.routeAffichee = route.cle;
+}
+
+/** Texte agrandi : quand les boutons de la barre du bas passent l'un sous l'autre, la barre se resserre (classe « empilee »). */
+function ajusterBarre() {
+  const barre = $('#barre-actions');
+  const boutons = [...barre.children];
+  barre.classList.remove('empilee');
+  barre.classList.toggle('empilee', boutons.length > 1 && boutons.at(-1).offsetTop > boutons[0].offsetTop);
 }
 
 /* ================================================================== */
@@ -591,9 +601,11 @@ const ACTIONS = {
     if (!b || b.id !== bouton.dataset.id) return;
     const note = Number(bouton.dataset.note);
     b.note = b.note === note ? null : note; // toucher la même étoile retire la note
-    document.querySelectorAll('.etoiles button').forEach((etoile) => {
+    document.querySelectorAll('.e-note-edition button').forEach((etoile) => {
       const i = Number(etoile.dataset.note);
-      etoile.classList.toggle('pleine', i <= (b.note ?? 0));
+      const pleine = i <= (b.note ?? 0);
+      etoile.classList.toggle('pleine', pleine);
+      etoile.textContent = pleine ? '★' : '☆'; // la forme dit la note, pas seulement la couleur
       etoile.setAttribute('aria-pressed', String(i === b.note));
     });
     majEtatResultat();
@@ -662,11 +674,11 @@ const ACTIONS = {
   'ajouter-recette': () => {
     ouvrirFeuille(html`<div class="feuille-contenu">
       <h2 tabindex="-1" autofocus>Ajouter une recette</h2>
-      <div class="pile-boutons">
-        <button type="button" class="btn btn-primaire btn-geant btn-large" data-action="aller" data-cible="#/importer">${ICONES.coller}Importer depuis Pizza App</button>
-        <button type="button" class="btn btn-geant btn-large" data-action="aller" data-cible="#/nouvelle">${ICONES.crayon}Saisir une recette</button>
-        <button type="button" class="btn btn-discret btn-large" data-action="fermer-feuille">Annuler</button>
+      <div class="e-menu">
+        ${ligneAction({ action: 'aller', cible: '#/importer', symbole: SYMBOLES.coller, titre: 'Importer depuis Pizza App', detail: 'Coller le texte partagé par Pizza App' })}
+        ${ligneAction({ action: 'aller', cible: '#/nouvelle', symbole: SYMBOLES.crayon, titre: 'Saisir une recette', detail: 'Remplir le formulaire à la main' })}
       </div>
+      <button type="button" class="e-btn e-btn--secondaire e-btn--large" data-action="fermer-feuille">Annuler</button>
     </div>`);
   },
   aller: (bouton) => {
@@ -794,6 +806,13 @@ function installerEcouteurs() {
     }
   });
 
+  // Hauteur réelle de la barre d'actions (elle grandit avec la taille du texte) : réservée sous la page.
+  const barre = $('#barre-actions');
+  new ResizeObserver(() => {
+    document.body.style.setProperty('--hauteur-barre', `${barre.offsetHeight}px`);
+    requestAnimationFrame(ajusterBarre); // taille du texte ou largeur changée : les boutons s'empilent peut-être
+  }).observe(barre);
+
   const feuille = $('#feuille');
   feuille.addEventListener('click', (e) => {
     if (e.target === feuille) fermerFeuille(); // toucher le fond grisé referme la feuille
@@ -828,7 +847,7 @@ function enregistrerServiceWorker() {
         if (!inscription.waiting || !navigator.serviceWorker.controller) return;
         const zone = $('#maj');
         zone.innerHTML = String(html`<span>Une nouvelle version est disponible.</span>
-          <button type="button" class="btn-petit">Mettre à jour</button>`);
+          <button type="button" class="e-btn e-btn--secondaire e-btn--petit">Mettre à jour</button>`);
         zone.hidden = false;
         zone.querySelector('button').addEventListener('click', () => {
           miseAJourDemandee = true;

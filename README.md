@@ -11,6 +11,8 @@ Appli web statique (HTML, CSS, JavaScript, sans dépendance), installable sur l'
 - la température de l'eau ;
 - les durées de pointage, de frigo et de remise à température.
 
+**Refonte visuelle (version 0.3.0)** : même démarche que Brasserie Ensen, aux couleurs de la pizzeria. Contrastes AA en clair et en sombre, texte qui suit la taille choisie sur l'iPhone, trois styles de boutons, champs remplis, fenêtres à la manière d'iOS, icône avec chaque alerte et chaque erreur. Le guide de style est dans [DESIGN.md](DESIGN.md).
+
 **Carnet des fournées** : depuis le récap, « Ajouter au carnet » enregistre une copie figée de la fournée. Après la cuisson, on y note le résultat : une note sur 5, des constats rapides (facile à étaler, collante…) et un commentaire. Le résultat n'est gardé qu'après avoir touché « Enregistrer », en haut à droite. L'écran Fournée rappelle le dernier résultat de la recette choisie, pour ajuster la fournée suivante.
 
 ## Essayer sur l'ordinateur
@@ -75,9 +77,11 @@ Une fois ouverte une première fois depuis l'icône, l'appli fonctionne sans ré
 ```
 index.html, manifest.webmanifest   page de l'appli, installation sur l'écran d'accueil
 sw.js                              copie hors ligne (caches « pizzeria-… »)
-css/app.css                        thème clair/sombre, gros boutons
+css/systeme.css                    système de design : jetons clair/sombre (--e-…), composants (.e-…)
+css/app.css                        mise en page, barres, cartes, compteur, doses, grille
 js/app.js                          démarrage, navigation, actions
-js/ecrans.js, js/ui.js             écrans et composants
+js/ecrans.js                       écrans
+js/composants.js, js/ui.js         symboles, badges, note, messages ; icônes des barres, illustrations, feuilles
 js/import.js                       lecture du texte Pizza App et du bloc JSON
 js/calculs.js                      doses (pourcentages du boulanger), lecture de la grille entre deux températures
 js/fournee.js                      fournée : variables du jour (boules, pièce, levure) et récap
