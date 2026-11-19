@@ -26,14 +26,14 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Sous la barre d'état de l'iPhone (heure, batterie) : fond opaque, puis un court fondu,
+/* Sous la barre d'état de l'iPhone (heure, batterie) : fond opaque et net, sans fondu,
    pour que le contenu qui défile ne transparaisse jamais derrière l'heure. */
 body::before {
   content: "";
   position: fixed;
   inset: 0 0 auto;
-  height: calc(env(safe-area-inset-top) + 10px);
-  background: linear-gradient(var(--e-fond) calc(100% - 10px), transparent);
+  height: env(safe-area-inset-top);
+  background: var(--e-fond);
   pointer-events: none;
   z-index: 30;
 }
@@ -75,13 +75,13 @@ small { font-size: 0.8em; }
 /* ---------- En-têtes ---------- */
 
 #entete { padding-top: env(safe-area-inset-top); }
+/* Barre de titre collante : opaque (pas de flou), séparée du contenu par un filet */
 #entete.collant {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--e-fond-translucide);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  background: var(--e-fond);
+  box-shadow: 0 1px 0 var(--e-bordure);
 }
 
 /* Grand titre façon iOS (écrans des onglets) : il suit la taille du texte, comme sur iOS */

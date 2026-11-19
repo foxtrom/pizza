@@ -100,7 +100,8 @@ Pour les chiffres clés, le nombre est en gras et l'unité en gris, et les élé
 
 - `--e-ombre` : `0 1px 2px` à 4 % et `0 8px 24px` à 6 %, teinte brune. Pour les cartes, les blocs et les boutons ronds.
 - `--e-ombre-flottante` : `0 10px 30px` à 12 %. Pour la barre d'onglets, le bouton « + » et le message temporaire.
-- Barre d'onglets et en-têtes collants : fond translucide (88 %) avec flou d'arrière-plan.
+- Barre d'onglets : fond translucide (88 %) avec flou d'arrière-plan.
+- Barre de titre collante (fiches, récap, formulaire) : fond opaque, séparée du contenu par un filet `--e-bordure`. Pas de flou en haut de l'écran.
 - Pas de bordure épaisse : la séparation vient de l'ombre et du changement de teinte.
 
 ## Boutons : trois styles
@@ -223,4 +224,4 @@ Les couleurs du pâton et du disque passent par des jetons : les dessins s'adapt
 
 L'appli installée utilise `apple-mobile-web-app-status-bar-style: default` : texte de la barre d'état en noir sur fond clair, en blanc en thème sombre. La couleur `theme-color` suit le thème : crème en clair, presque noir en sombre.
 
-Derrière l'heure et la batterie, la bande est opaque (couleur du fond), prolongée d'un fondu de 10 px : le contenu qui défile ne transparaît jamais derrière la barre d'état.
+Derrière l'heure et la batterie, la bande est opaque (couleur du fond) et nette, sans fondu : le contenu qui défile ne transparaît jamais derrière la barre d'état.
